@@ -27,7 +27,7 @@ function ask_user_for_disk() {
         if [ -v "DISKS[$SELECTED_INDEX]" ] && [ "$SELECTED_INDEX" -eq "$SELECTED_INDEX" ] 2>/dev/null; then
             IFS=' '
             SELECTED_NAME=(${SELECTED_DISK[0]})
-            echo "${SELECTED_NAME[0]}"
+            echo "/dev/${SELECTED_NAME[0]}"
             return
         else
             echo "Disk with index $SELECTED_INDEX does not exist, try again" > /dev/tty
@@ -36,5 +36,34 @@ function ask_user_for_disk() {
     done
 }
 
+function partition_disk() {
+    echo "Partitioning disk $1..."
+    sfdisk $1 < partition-scheme.sfdisk
+}
+
+function get_partitions() {
+    PARTITIONS=$(lsblk -r $1 | cut -d' ' -f1)
+    IFS=$'\n'
+    PARTITIONS=($PARTITIONS)
+    PARTITIONS=("${PARTITIONS[@]:2}")
+    printf '%s\n' "${PARTITIONS[@]}"
+}
+
+function format_disk() {
+    echo "Formatting partitions..."
+
+    EFI_PARTITION=$1
+    ROOT_PARTITION=$2
+    echo "EFI $EFI_PARTITION"
+    echo "ROOT $ROOT_PARTITION"
+}
+
 INSTALL_DISK=$(ask_user_for_disk)
-echo "INSTALL_DISK=$INSTALL_DISK"
+
+partition_disk $INSTALL_DISK
+
+IFS=$'\n'
+PARTITIONS=($(get_partitions $INSTALL_DISK))
+echo "Partitions: ${PARTITIONS[@]}"
+
+format_disk ${PARTITIONS[@]}
