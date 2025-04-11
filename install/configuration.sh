@@ -20,6 +20,26 @@ function configure_basics() {
     arch-chroot /mnt locale-gen
 }
 
+function install_linux() {
+    echo "Installing basic linux..."
+    PACKAGES="base base-devel linux linux-firmware git nano cryptsetup amd-ucode sbctl sudo htop btop nvtop dhcpcd"
+    pacstrap -K /mnt $PACKAGES
+}
+
+function create_user() {
+    DEFAULT_PASSWORD="root"
+
+    echo "Creating user..."
+    arch-chroot /mnt useradd -G wheel -m $1
+    echo $DEFAULT_PASSWORD | arch-chroot /mnt passwd $1 --stdin
+}
+
+function configure_sudo() {
+    echo "Configuring sudo..."
+    LINE="%wheel      ALL=(ALL:ALL) ALL"
+    echo $LINE >> /mnt/etc/sudoers
+}
+
 function setup_uki() {
     echo "Setting up UKI"
 
@@ -55,8 +75,17 @@ function setup_uki() {
     systemctl reboot --firmware-setup
 }
 
+function enable_services() {
+    echo "Enabling systemd services"
+    systemctl --root /mnt enable systemd-resolved systemd-timesyncd dhcpcd
+}
+
 $LOGIN_NAME=$1
 $HOSTNAME=$2
 
 configure_basics $HOSTNAME
-
+install_linux
+create_user $LOGIN_NAME
+configure_sudo
+setup_uki
+enable_services
