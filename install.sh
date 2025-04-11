@@ -38,7 +38,6 @@ function ask_user_for_details() {
 
 print_logo
 
-exit 1
 
 IFS=' '
 USER_DETAILS=($(ask_user_for_details))
