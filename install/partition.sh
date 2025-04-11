@@ -59,7 +59,7 @@ function format_disk() {
     mkfs.vfat -F32 $EFI_PARTITION
 
     echo "Creating LUKS partition"
-    cryptsetup luksFormat --type luks2 $ROOT_PARTITION luks-temp.key
+    cryptsetup luksFormat --type luks2 -q $ROOT_PARTITION luks-temp.key
     cryptsetup luksOpen $ROOT_PARTITION linuxroot luks-temp.key
 
     echo "Formatting /"
