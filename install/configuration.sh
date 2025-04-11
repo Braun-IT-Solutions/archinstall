@@ -48,7 +48,7 @@ function setup_uki() {
 
     echo "Setting mkinitcpio hooks..."
     HOOKS="(base systemd autodetect modconf kms keyboard sd-vconsole sd-encrypt block filesystems fsck)"
-    sed -i -e "s/^HOOKS=.*/${HOOKS}/g" /mnt/etc/mkinitcpio.conf
+    sed -i -e "s/^HOOKS=.*/HOOKS=${HOOKS}/g" /mnt/etc/mkinitcpio.conf
 
     echo "Enabling UKI"
     sed -i -e "s/^default_config=/#default_config=/g" /mnt/etc/mkinitcpio.d/linux.preset
