@@ -32,6 +32,9 @@ function create_user() {
     echo "Creating user..."
     arch-chroot /mnt useradd -G wheel -m $1
     echo $DEFAULT_PASSWORD | arch-chroot /mnt passwd $1 --stdin
+    
+    echo -e "\033[31mYour initial password is \033[1m$DEFAULT_PASSWORD\033[0m"
+    sleep 5
 }
 
 function configure_sudo() {
