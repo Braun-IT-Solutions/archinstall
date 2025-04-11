@@ -21,6 +21,9 @@ function configure_basics() {
 }
 
 function install_linux() {
+    echo "Finding fastest mirrors..."
+    reflector --country DE --age 24 --protocol http,https --sort rate --save /etc/pacman.d/mirrorlist
+
     echo "Installing basic linux..."
     PACKAGES="base base-devel linux linux-firmware git nano cryptsetup amd-ucode sbctl sudo htop btop nvtop dhcpcd"
     pacstrap -K /mnt $PACKAGES
@@ -39,8 +42,7 @@ function create_user() {
 
 function configure_sudo() {
     echo "Configuring sudo..."
-    LINE="%wheel      ALL=(ALL:ALL) ALL"
-    echo $LINE >> /mnt/etc/sudoers
+    sed -i -e '/^# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/s/^# //' /mnt/etc/sudoers
 }
 
 function setup_uki() {
@@ -83,12 +85,12 @@ function enable_services() {
     systemctl --root /mnt enable systemd-resolved systemd-timesyncd dhcpcd
 }
 
-$LOGIN_NAME=$1
-$HOSTNAME=$2
+LOGIN_NAME=$1
+HOSTNAME=$2
 
-configure_basics $HOSTNAME
+configure_basics "$HOSTNAME"
 install_linux
-create_user $LOGIN_NAME
+create_user "$LOGIN_NAME"
 configure_sudo
 setup_uki
 enable_services
