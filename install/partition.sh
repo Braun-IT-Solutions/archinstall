@@ -60,7 +60,7 @@ function format_disk() {
 
     echo "Creating LUKS partition"
     cryptsetup luksFormat --type luks2 -q $ROOT_PARTITION luks-temp.key
-    cryptsetup luksOpen $ROOT_PARTITION linuxroot luks-temp.key
+    cryptsetup luksOpen $ROOT_PARTITION linuxroot --keyfile luks-temp.key
 
     echo "Formatting /"
     mkfs.ext4 "/dev/mapper/linuxroot"
