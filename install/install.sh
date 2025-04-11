@@ -1,5 +1,11 @@
 #!/usr/bin/bash
 
+# TODOS for Pascal
+# - set -e should actually do something
+# - Validation for disk user selection seems to not work with spaces
+# - Maybe add checks for arguments in functions
+# - Research mechanism to allow post-install script to run automagically
+
 set -e
 
 function print_logo() {
