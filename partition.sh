@@ -23,7 +23,7 @@ function ask_user_for_disk() {
 
         read -p "Select a partition: " SELECTED_INDEX
 
-        SELECTED_DISK=${DISKS[$SELECTED_INDEX]}
+        SELECTED_DISK=${DISKS["$SELECTED_INDEX"]}
         if [ -v "DISKS[$SELECTED_INDEX]" ] && [ "$SELECTED_INDEX" -eq "$SELECTED_INDEX" ] 2>/dev/null; then
             IFS=' '
             SELECTED_NAME=(${SELECTED_DISK[0]})
