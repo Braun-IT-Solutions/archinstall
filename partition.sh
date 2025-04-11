@@ -68,7 +68,7 @@ function format_disk() {
 
 function mount_filesystem() {
     mount /dev/mapper/linuxroot /mnt
-    echo "$1 /mnt/efi"
+    mount --mkdir $1 /mnt/efi
 }
 
 set -eo pipefail
