@@ -7,8 +7,8 @@ function configure_basics() {
     arch-chroot /mnt hwclock --systohc
 
     echo "Setting locales"
-    sed -i -e "/^#"de_DE.UTF-8"/s/^#//" /mnt/etc/local.gen
-    sed -i -e "/^#"en_US.UTF-8"/s/^#//" /mnt/etc/local.gen
+    sed -i -e "/^#"de_DE.UTF-8"/s/^#//" /mnt/etc/locale.gen
+    sed -i -e "/^#"en_US.UTF-8"/s/^#//" /mnt/etc/locale.gen
 
     echo "Setting keymap"
     echo "KEYMAP=de-latin1" > /mnt/etc/vconsole.conf
