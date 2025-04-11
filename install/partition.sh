@@ -46,7 +46,7 @@ function get_partitions() {
     IFS=$'\n'
     PARTITIONS=($PARTITIONS)
     PARTITIONS=("${PARTITIONS[@]:2}")
-    printf '%s\n' "${PARTITIONS[@]}"
+    printf '%s\n' "${PARTITIONS[@]/#//dev/}"
 }
 
 function format_disk() {
