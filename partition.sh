@@ -81,6 +81,6 @@ IFS=$'\n'
 PARTITIONS=($(get_partitions $INSTALL_DISK))
 echo "Partitions: ${PARTITIONS[@]}"
 
-#format_disk ${PARTITIONS[@]}
+format_disk ${PARTITIONS[@]}
 
-#mount_filesystem ${PARTITIONS[0]}
+mount_filesystem ${PARTITIONS[0]}

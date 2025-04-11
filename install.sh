@@ -1,8 +1,8 @@
 #!/usr/bin/bash
 
 # TODOS for Pascal
-# - set -e should actually do something
-# - Validation for disk user selection seems to not work with spaces
+#DONE?  - set -e should actually do something
+#DONE? - Validation for disk user selection seems to not work with spaces
 # - Maybe add checks for arguments in functions
 # - Research mechanism to allow post-install script to run automagically
 
@@ -55,6 +55,6 @@ echo "Hostname: ${HOSTNAME}"
 
 ./partition.sh
 
-#./configuration.sh $LOGIN_NAME $HOSTNAME
+./configuration.sh $LOGIN_NAME $HOSTNAME
 
 
