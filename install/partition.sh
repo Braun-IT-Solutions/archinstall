@@ -54,8 +54,16 @@ function format_disk() {
 
     EFI_PARTITION=$1
     ROOT_PARTITION=$2
-    echo "EFI $EFI_PARTITION"
-    echo "ROOT $ROOT_PARTITION"
+
+    echo "Formatting /efi..."
+    mkfs.vfat -F32 $EFI_PARTITION
+
+    echo "Creating LUKS partition"
+    cryptsetup luksFormat --type luks2 $ROOT_PARTITION < "temp"
+    cryptsetup luksOpen $ROOT_PARTITION linuxroot < "temp"
+
+    echo "Formatting /"
+    mkfs.ext4 "/dev/mapper/linuxroot"
 }
 
 INSTALL_DISK=$(ask_user_for_disk)
