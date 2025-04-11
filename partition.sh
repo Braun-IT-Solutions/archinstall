@@ -71,6 +71,8 @@ function mount_filesystem() {
     mount --mkdir $1 /mnt/efi
 }
 
+set -eo pipefail
+
 INSTALL_DISK=$(ask_user_for_disk)
 
 partition_disk $INSTALL_DISK
@@ -79,6 +81,6 @@ IFS=$'\n'
 PARTITIONS=($(get_partitions $INSTALL_DISK))
 echo "Partitions: ${PARTITIONS[@]}"
 
-format_disk ${PARTITIONS[@]}
+#format_disk ${PARTITIONS[@]}
 
-mount_filesystem ${PARTITIONS[0]}
+#mount_filesystem ${PARTITIONS[0]}

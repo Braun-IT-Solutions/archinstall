@@ -85,6 +85,8 @@ function enable_services() {
     systemctl --root /mnt enable systemd-resolved systemd-timesyncd dhcpcd
 }
 
+set -eo pipefail
+
 LOGIN_NAME=$1
 HOSTNAME=$2
 

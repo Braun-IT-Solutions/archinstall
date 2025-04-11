@@ -6,7 +6,7 @@
 # - Maybe add checks for arguments in functions
 # - Research mechanism to allow post-install script to run automagically
 
-set -e
+set -eo pipefail
 
 function print_logo() {
     echo -e ' $$$$$$$\  $$$$$$\ $$$$$$$$\  $$$$$$\' "\n" \
@@ -46,4 +46,4 @@ echo "Hostname: ${HOSTNAME}"
 
 ./partition.sh
 
-./configuration.sh $LOGIN_NAME $HOSTNAME
+#./configuration.sh $LOGIN_NAME $HOSTNAME
