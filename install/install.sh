@@ -38,6 +38,6 @@ INITIALS="${FIRST_NAME:0:1}${LAST_NAME:0:1}"
 HOSTNAME="AXD-${INITIALS^^}${LUCKY_NUMBER}"
 echo "Hostname: ${HOSTNAME}"
 
-#./partition.sh
+./partition.sh
 
 ./configuration.sh $LOGIN_NAME $HOSTNAME
