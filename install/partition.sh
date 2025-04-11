@@ -66,6 +66,11 @@ function format_disk() {
     mkfs.ext4 "/dev/mapper/linuxroot"
 }
 
+function mount_filesystem() {
+    mount /dev/mapper/linuxroot /mnt
+    mount --mkdir $1 /mnt/efi
+}
+
 INSTALL_DISK=$(ask_user_for_disk)
 
 partition_disk $INSTALL_DISK
@@ -75,3 +80,5 @@ PARTITIONS=($(get_partitions $INSTALL_DISK))
 echo "Partitions: ${PARTITIONS[@]}"
 
 format_disk ${PARTITIONS[@]}
+
+mount_filesystem ${PARTITIONS[0]}
