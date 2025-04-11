@@ -8,6 +8,13 @@
 
 set -eo pipefail
 
+function was_successfull() {
+    if [ $? -ne 0 ]; then
+        echo "Error: Command failed. Exiting."
+        exit 1
+    fi
+}
+
 function print_logo() {
     echo -e ' $$$$$$$\  $$$$$$\ $$$$$$$$\  $$$$$$\' "\n" \
         '$$  __$$\ \_$$  _|\__$$  __|$$  __$$\' "\n" \
@@ -31,6 +38,8 @@ function ask_user_for_details() {
 
 print_logo
 
+exit 1
+
 IFS=' '
 USER_DETAILS=($(ask_user_for_details))
 FIRST_NAME=${USER_DETAILS[0]}
@@ -47,3 +56,5 @@ echo "Hostname: ${HOSTNAME}"
 ./partition.sh
 
 #./configuration.sh $LOGIN_NAME $HOSTNAME
+
+
