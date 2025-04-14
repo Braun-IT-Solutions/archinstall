@@ -1,10 +1,10 @@
 #!/usr/bin/bash
 
-function checkSetupMode{
+function checkSetupMode(){
   sbctl status
 }
 
-function createKeysAndSign{
+function createKeysAndSign(){
   sbctl create-keys
   sbctl enroll-keys -m
 
