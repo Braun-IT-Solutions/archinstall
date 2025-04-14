@@ -83,6 +83,13 @@ function setup_uki() {
 
     sync
 
+
+    "echo 'HALLO, TEST \n\n\n\n\n\n\n'" > /etc/init.d/post-install.sh
+
+
+
+
+
     echo "Rebooting, please set Secure Boot in BIOS to setup mode!"
     read -p "Press any key to reboot and continue" IGNORE
 
