@@ -69,7 +69,7 @@ function setup_uki() {
     sed -i -e "s/^fallback_config=/#fallback_config=/g" /mnt/etc/mkinitcpio.d/linux.preset
     sed -i -e "s/^fallback_image=/#fallback_image=/g" /mnt/etc/mkinitcpio.d/linux.preset
     sed -i -e "s/^#fallback_uki=/fallback_uki=/g" /mnt/etc/mkinitcpio.d/linux.preset
-    sed -i -e "s/^#fallback_options=/fallback_options=/g" /mnt/etc/mkinitcpio.d/linux.preset
+    sed -i -e "s/^#fallback_options=/fallback_options=/g" /mnt/etc/mk initcpio.d/linux.preset
 
     echo "Generating UKI..."
     arch-chroot /mnt mkinitcpio -P
@@ -88,7 +88,6 @@ function setup_uki() {
 
     systemctl reboot --firmware-setup
 }
-
 
 
 set -eo pipefail

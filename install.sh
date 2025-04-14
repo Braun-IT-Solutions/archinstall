@@ -25,7 +25,7 @@ function print_logo() {
         '$$$$$$$  |$$$$$$\    $$ |   \$$$$$$  |' "\n" \
         '\_______/ \______|   \__|    \______/'
     echo -e "\nWelcome to BITS archinstall\n"
-}
+} 
 
 function ask_user_for_details() {
     echo "Please enter some basic info:" > /dev/tty
