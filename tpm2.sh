@@ -7,3 +7,5 @@ function recoveryKey {
   systemd-cryptenroll /dev/gpt-auto-root-luks --wipe-slot=password
 
 }
+
+recoveryKey
