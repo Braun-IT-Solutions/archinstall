@@ -28,4 +28,4 @@ set -eo pipefail
 #checkSetupMode
 createKeysAndSign
 
-#./tpm2.sh
+./tpm2.sh
