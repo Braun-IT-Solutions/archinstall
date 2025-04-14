@@ -1,6 +1,5 @@
 function checkSetupMode{
-  SETUP_MODE=$(sbctl status)
-  echo $SETUP_MODE
+  sbctl status
 }
 
 function createKeysAndSign{
@@ -15,7 +14,9 @@ function createKeysAndSign{
   mkinitcpio -P 
 }
 
-checkSetupMode
+set -eo pipefail
+
+#checkSetupMode
 createKeysAndSign
 
 #./tpm2.sh
