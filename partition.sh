@@ -37,17 +37,11 @@ function ask_user_for_disk() {
 }
 
 function partition_disk() {
-    if [ -v $1] 2>dev/null; then
-        exit 6 
-    fi
     echo "Partitioning disk $1..."
     sfdisk $1 < partition-scheme.sfdisk
 }
 
-function get_partitions() {
-    if ! [ -v $1 && -v $2] 2>dev/null; then
-        exit 6 
-    fi    
+function get_partitions() {   
     PARTITIONS=$(lsblk -r $1 | cut -d' ' -f1)
     IFS=$'\n'
     PARTITIONS=($PARTITIONS)
@@ -56,9 +50,6 @@ function get_partitions() {
 }
 
 function format_disk() {
-    if ! [ -v $1] 2>dev/null; then
-        exit 6
-    fi
     echo "Formatting partitions..."
 
     EFI_PARTITION=$1
@@ -76,9 +67,6 @@ function format_disk() {
 }
 
 function mount_filesystem() {
-    if ! [ -v $1] 2>dev/null; then
-        exit 6 
-    fi
     mount /dev/mapper/linuxroot /mnt
     mount --mkdir $1 /mnt/efi
 }
