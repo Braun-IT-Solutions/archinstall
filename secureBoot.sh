@@ -1,6 +1,6 @@
 function checkSetupMode{
-  sbctl
-  SETUP_MODE=$(sbctl | cut -d' ' -f1)
+  SETUP_MODE=$(sbctl status)
+  echo $SETUP_MODE
 }
 
 function createKeysAndSign{
