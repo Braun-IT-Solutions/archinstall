@@ -38,6 +38,7 @@ function ask_user_for_disk() {
 
 function partition_disk() {
     echo "Partitioning disk $1..."
+    #wipefs -a $1
     sfdisk $1 < partition-scheme.sfdisk
 }
 
