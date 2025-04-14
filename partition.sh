@@ -37,7 +37,7 @@ function ask_user_for_disk() {
 }
 
 function partition_disk() {
-    if ! [ -v $1] 2>dev/null; then
+    if [ -v $1] 2>dev/null; then
         exit 6 
     fi
     echo "Partitioning disk $1..."
