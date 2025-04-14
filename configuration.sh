@@ -45,6 +45,11 @@ function configure_sudo() {
     sed -i -e '/^# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/s/^# //' /mnt/etc/sudoers
 }
 
+function enable_services() {
+    echo "Enabling systemd services"
+    systemctl --root /mnt enable systemd-resolved systemd-timesyncd dhcpcd
+}
+
 function setup_uki() {
     echo "Setting up UKI"
 
@@ -72,6 +77,10 @@ function setup_uki() {
     echo "Installing bootloader..."
     arch-chroot /mnt bootctl install --esp-path=/efi
 
+    #Services aktivieren?
+    #oder nicht weil wir dhcpcd benutzen
+    enable_services
+
     sync
 
     echo "Rebooting, please set Secure Boot in BIOS to setup mode!"
@@ -80,19 +89,16 @@ function setup_uki() {
     systemctl reboot --firmware-setup
 }
 
-function enable_services() {
-    echo "Enabling systemd services"
-    systemctl --root /mnt enable systemd-resolved systemd-timesyncd dhcpcd
-}
+
 
 set -eo pipefail
 
 LOGIN_NAME=$1
 HOSTNAME=$2
 
-configure_basics "$HOSTNAME"
 install_linux
+configure_basics "$HOSTNAME"
 create_user "$LOGIN_NAME"
 configure_sudo
 setup_uki
-enable_services
+

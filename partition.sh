@@ -74,7 +74,8 @@ function mount_filesystem() {
 set -eo pipefail
 
 INSTALL_DISK=$(ask_user_for_disk)
-
+echo $INSTALL_DISK
+ 
 partition_disk $INSTALL_DISK
 
 IFS=$'\n'
