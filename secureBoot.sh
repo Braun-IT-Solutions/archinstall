@@ -1,3 +1,5 @@
+#!/usr/bin/bash
+
 function checkSetupMode{
   sbctl status
 }
