@@ -11,9 +11,13 @@ function createKeysAndSign(){
 
   echo "Signing Keys.." > /dev/tty
   sudo sbctl sign -s -o /usr/lib/systemd/boot/efi/systemd-bootx64.efi.signed
+  echo "1" > /dev/tty
   sudo sbctl sign -s /efi/EFI/BOOT/BOOTX64.efi
+  echo "2" > /dev/tty
   sudo sbctl sign -s /efi/EFI/Linux/arch-linux.efi
+  echo "3" > /dev/tty
   sudo sbctl sign -s /efi/EFI/Linux/arch-linux-fallback.efi
+  echo "4" > /dev/tty
 
   echo "UKI's neu generieren" > /dev/tty
   sudo mkinitcpio -P 
