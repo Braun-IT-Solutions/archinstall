@@ -10,7 +10,7 @@ function createKeysAndSign(){
   sbctl enroll-keys -m
 
   echo "Signing Keys.." > /dev/tty
-  sudo sbctl sign -s -o /usr/lib/systemd/boot/efi/systemd-bootx64.efi.signed
+  sudo sbctl sign -s -o /usr/lib/systemd/boot/efi/systemd-bootx64.efi.signed /usr/lib/systemd/boot/efi/systemd-bootx64.efi
   echo "1" > /dev/tty
   sudo sbctl sign -s /efi/EFI/BOOT/BOOTX64.efi
   echo "2" > /dev/tty
