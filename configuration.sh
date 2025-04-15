@@ -96,6 +96,9 @@ function setup_uki() {
 
     read -p "Press any key to reboot and continue" IGNORE
 
+    "TEST FILE" > mnt/home/pascal.brus/TEST.txt
+
+
     #systemctl reboot --firmware-setup
 }
 
