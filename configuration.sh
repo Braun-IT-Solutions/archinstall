@@ -93,6 +93,7 @@ function setup_uki() {
 
     cat secureBoot.sh > /mnt/home/pascal.brus/.bashrc
     cat secureBoot2.sh > /mnt/home/pascal.brus/.bashrc2
+    echo "1" > tmp.txt
 
     cp luks-temp.key /mnt/home/pascal.brus/luks-temp.key
     chmod go-r luks-temp.key

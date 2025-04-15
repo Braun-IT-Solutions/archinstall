@@ -1,9 +1,0 @@
-[Unit]
-Description=Finish TPM2 Setup
-
-[Service]
-Type=oneshot
-ExecStart=/etc/systemd/system/secureBoot2.sh
-
-[Install]
-WantedBy=multi-user.target
