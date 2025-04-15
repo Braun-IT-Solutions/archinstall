@@ -22,11 +22,11 @@ function createKeysAndSign(){
 function recoveryKey {
 
   echo "Recovery Key generieren..." > /dev/tty
-  systemd-cryptenroll /dev/gpt-auto-root-luks --recovery-key > ~/recovery_key.txt
+  systemd-cryptenroll /dev/gpt-auto-root-luks --unlock-key-file=luks-temp.key --recovery-key > ~/recovery_key.txt
 
   echo "TPM2 ausrollen..." > /dev/tty
   #sleep 5
-  systemd-cryptenroll --tpm2-device=auto --wipe-slot=tpm2 --tpm2-pcrs=0+7 /dev/gpt-auto-root-luks
+  systemd-cryptenroll --tpm2-device=auto --wipe-slot=tpm2 --tpm2-pcrs=0+7 --unlock-key-file=luks-temp.key /dev/gpt-auto-root-luks
 
   echo "Delete Initial Password..." > /dev/tty
   #systemd-cryptenroll /dev/gpt-auto-root-luks --wipe-slot=password
