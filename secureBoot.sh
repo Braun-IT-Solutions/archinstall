@@ -24,17 +24,16 @@ function recoveryKey {
   echo "Recovery Key generieren..." > /dev/tty
   systemd-cryptenroll /dev/gpt-auto-root-luks --unlock-key-file=luks-temp.key --recovery-key > recovery_key.txt
 
-  echo "TPM2 ausrollen..." > /dev/tty
-  #$(systemd-cryptenroll --tpm2-device=auto --wipe-slot=tpm2 --tpm2-pcrs=0+7 --unlock-key-file=luks-temp.key /dev/gpt-auto-root-luks)
 
-  echo "Delete Initial Password..." > /dev/tty
-  #systemd-cryptenroll /dev/gpt-auto-root-luks --wipe-slot=password
+  echo "Rebooting, to setup TPM2 correctly"
+  read -p "Press any key to reboot and continue" IGNORE
+
+  systemctl reboot --firmware-setup
 
 }
 
 
 set -eo pipefail
-set -x
 
 #checkSetupMode
 createKeysAndSign
