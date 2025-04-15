@@ -93,7 +93,7 @@ function setup_uki() {
     echo "Rebooting, please set Secure Boot in BIOS to setup mode!"
     read -p "Press any key to reboot and continue" IGNORE
 
-    systemctl reboot --firmware-setup
+    #systemctl reboot --firmware-setup
 }
 
 
