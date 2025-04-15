@@ -84,19 +84,18 @@ function setup_uki() {
     sync
 
     cp secureBoot.service /mnt/etc/systemd/system/secureBoot.service
-    #cp secureBoot.sh /mnt/etc/systemd/system/secureBoot.sh
+    cp secureBoot.sh /mnt/etc/systemd/system/secureBoot.sh
 
 
 
 
 
-    echo "\033[1m Rebooting, please set Secure Boot in BIOS to setup mode! And Turn on SecureBoot\033[0m"
-    echo "\033[1m Rebooting, please set Secure Boot in BIOS to setup mode! And Turn on SecureBoot\033[0m"
-    echo "\033[1m Rebooting, please set Secure Boot in BIOS to setup mode! And Turn on SecureBoot\033[0m"
+    echo -e "\033[1m Rebooting, please set Secure Boot in BIOS to setup mode! And Turn on SecureBoot\033[0m"
+    echo -e "\033[1m Rebooting, please set Secure Boot in BIOS to setup mode! And Turn on SecureBoot\033[0m"
+    echo -e "\033[1m Rebooting, please set Secure Boot in BIOS to setup mode! And Turn on SecureBoot\033[0m"
 
     read -p "Press any key to reboot and continue" IGNORE
 
-    "TEST FILE" > mnt/home/pascal.brus/TEST.txt
 
 
     #systemctl reboot --firmware-setup

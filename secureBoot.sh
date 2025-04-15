@@ -31,11 +31,11 @@ function recoveryKey {
 
 
   cp secureBoot2.service /mnt/etc/systemd/system/secureBoot2.service
-  #cp secureBoot2.sh /mnt/etc/systemd/system/secureBoot2.sh
+  cp secureBoot2.sh /mnt/etc/systemd/system/secureBoot2.sh
 
 
 
-  #systemctl reboot --firmware-setup
+  systemctl reboot --firmware-setup
 
 }
 
@@ -45,4 +45,3 @@ set -eo pipefail
 #checkSetupMode
 #createKeysAndSign
 #recoveryKey
-"TEST FILE" > mnt/home/pascal.brus/TEST.txt
