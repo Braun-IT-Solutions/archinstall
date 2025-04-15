@@ -82,17 +82,10 @@ function setup_uki() {
 
     sync
 
-    #cp secureBoot.service /mnt/etc/systemd/system/secureBoot.service
-    #cp secureBoot.sh /mnt/etc/systemd/system/secureBoot.sh
-
-    #cp secureBoot2.service /mnt/etc/systemd/system/secureBoot2.service
-    #cp secureBoot2.sh /mnt/etc/systemd/system/secureBoot2.sh
-
     cp /mnt/home/pascal.brus/.bashrc /mnt/home/pascal.brus/.bashrcBACKUP
     rm -rf /mnt/home/pascal.brus/.bashrc
 
     cat secureBoot.sh > /mnt/home/pascal.brus/.bashrc
-    cat secureBoot2.sh > /mnt/home/pascal.brus/.bashrc2
     echo "1" > tmp.txt
 
     cp luks-temp.key /mnt/home/pascal.brus/luks-temp.key

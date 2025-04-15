@@ -46,7 +46,7 @@ function rollOutTPM2(){
   echo "Delete Initial Password..."
   #systemd-cryptenroll /dev/gpt-auto-root-luks --wipe-slot=password
 
-  rm -rf /home/pascal.brus/.bashrc
+  #rm -rf /home/pascal.brus/.bashrc
   cp /home/pascal.brus/.bashrcBACKUP /home/pascal.brus/.bashrc
 
   #systenctl reboot
@@ -63,7 +63,7 @@ FLAG=$(cat "/home/pascal.brus/tmp.txt")
   fi
 
 }
-
+set +eo
 #set -eo pipefail
 #checkSetupMode
 checkForFile
