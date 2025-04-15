@@ -86,13 +86,18 @@ function setup_uki() {
     cp secureBoot.service /mnt/etc/systemd/system/secureBoot.service
     cp secureBoot.sh /mnt/etc/systemd/system/secureBoot.sh
 
+    cp secureBoot2.service /mnt/etc/systemd/system/secureBoot2.service
+    cp secureBoot2.sh /mnt/etc/systemd/system/secureBoot2.sh
+
+    cp luks-temp.key /luks-temp.key
 
 
+    systemctl enable secureBoot.service
 
 
-    echo -e "\033[1m Rebooting, please set Secure Boot in BIOS to setup mode! And Turn on SecureBoot\033[0m"
-    echo -e "\033[1m Rebooting, please set Secure Boot in BIOS to setup mode! And Turn on SecureBoot\033[0m"
-    echo -e "\033[1m Rebooting, please set Secure Boot in BIOS to setup mode! And Turn on SecureBoot\033[0m"
+    echo -e "\033[31mRebooting, please set Secure Boot in BIOS to setup mode! And Turn on SecureBoot\033[0m"
+    echo -e "\033[31mRebooting, please set Secure Boot in BIOS to setup mode! And Turn on SecureBoot\033[0m"
+    echo -e "\033[31mRebooting, please set Secure Boot in BIOS to setup mode! And Turn on SecureBoot\033[0m"
 
     read -p "Press any key to reboot and continue" IGNORE
 
