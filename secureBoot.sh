@@ -30,8 +30,8 @@ function recoveryKey {
 
 
 
-  cp secureBoot2.service /etc/systemd/system/secureBoot2.service
-  #cp secureBoot2.sh /etc/systemd/system/secureBoot2.sh
+  cp secureBoot2.service /mnt/etc/systemd/system/secureBoot2.service
+  #cp secureBoot2.sh /mnt/etc/systemd/system/secureBoot2.sh
 
 
 
