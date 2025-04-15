@@ -42,5 +42,5 @@ function recoveryKey {
 set -eo pipefail
 
 #checkSetupMode
-createKeysAndSign
-recoveryKey
+#createKeysAndSign
+#recoveryKey

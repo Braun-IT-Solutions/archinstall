@@ -14,4 +14,4 @@ function rollOutTPM2(){
 }
 set -eo pipefail
 
-rollOutTPM2
+#rollOutTPM2

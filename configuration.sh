@@ -107,7 +107,7 @@ function setup_uki() {
 
 
 
-    systemctl reboot --firmware-setup
+    #systemctl reboot --firmware-setup
 }
 
 
