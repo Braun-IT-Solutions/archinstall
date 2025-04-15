@@ -30,7 +30,7 @@ function recoveryKey {
 
 
   echo "Rebooting, to setup TPM2 correctly"
-  systemctl reboot --firmware-setup
+  systemctl reboot
 
 }
 
