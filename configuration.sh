@@ -92,18 +92,17 @@ function setup_uki() {
     chmod go-r luks-temp.key
 
 
-    #systemctl enable secureBoot.service
 
+    echo -e "\033[31mRebooting, please set Secure Boot in BIOS to setup mode! And Turn on SecureBoot[0m"
+    echo -e "\033[31mRebooting, please set Secure Boot in BIOS to setup mode! And Turn on SecureBoot[0m"
+    echo -e "\033[31mRebooting, please set Secure Boot in BIOS to setup mode! And Turn on SecureBoot[0m"
 
-    echo -e "\033[31mRebooting, please set Secure Boot in BIOS to setup mode! And Turn on SecureBoot\033[0m"
-    echo -e "\033[31mRebooting, please set Secure Boot in BIOS to setup mode! And Turn on SecureBoot\033[0m"
-    echo -e "\033[31mRebooting, please set Secure Boot in BIOS to setup mode! And Turn on SecureBoot\033[0m"
 
     read -p "Press any key to reboot and continue" IGNORE
 
 
 
-    #systemctl reboot --firmware-setup
+    systemctl reboot --firmware-setup
 }
 
 
