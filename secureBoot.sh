@@ -19,7 +19,7 @@ function createKeysAndSign(){
   sudo mkinitcpio -P 
 }
 
-function recoveryKey {
+function recoveryKey() {
 
   echo "Recovery Key generieren..."
   sudo systemd-cryptenroll /dev/gpt-auto-root-luks --unlock-key-file=luks-temp.key --recovery-key > /home/pascal.brus/recovery_key.txt
@@ -41,9 +41,7 @@ function rollOutTPM2(){
 
   rm -rf /home/pascal.brus/.bashrc
   cp /home/pascal.brus/.bashrcBACKUP /home/pascal.brus/.bashrc
-  rm -rf /home/pascal.brus/.bashrcBACKUP
-  rm -rf /home/pascal.brus/luks-temp.key
-  rm -rf /home/pascal.brus/tmp.txt
+  rm -rf /home/pascal.brus/.bashrcBACKUP /home/pascal.brus/luks-temp.key /home/pascal.brus/tmp.txt
 
 
   #systenctl reboot
@@ -55,8 +53,10 @@ FLAG=$(cat "/home/pascal.brus/tmp.txt")
   if [ "$FLAG" -eq 1 ] 2>/dev/null; then
     createKeysAndSign
     recoveryKey
-  else
+  elif [ "$FLAG" -eq 2 ] 2>/dev/null; then
     rollOutTPM2
+  else
+    echo "Unexpected FLAG in tmp.txt"
   fi
 
 }

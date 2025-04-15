@@ -93,9 +93,9 @@ function setup_uki() {
 
 
 
-    echo -e "\033[31mRebooting, please set Secure Boot in BIOS to setup mode! And Turn on SecureBoot[0m"
-    echo -e "\033[31mRebooting, please set Secure Boot in BIOS to setup mode! And Turn on SecureBoot[0m"
-    echo -e "\033[31mRebooting, please set Secure Boot in BIOS to setup mode! And Turn on SecureBoot[0m"
+    echo -e "\033[31mRebooting, please set Secure Boot in BIOS to setup mode! And Turn on SecureBoot"
+    echo -e "\033[31mRebooting, please set Secure Boot in BIOS to setup mode! And Turn on SecureBoot"
+    echo -e "\033[31mRebooting, please set Secure Boot in BIOS to setup mode! And Turn on SecureBoot"
 
 
     read -p "Press any key to reboot and continue" IGNORE
