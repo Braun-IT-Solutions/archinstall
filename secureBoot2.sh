@@ -6,7 +6,7 @@ function rollOutTPM2(){
   echo "Delete Initial Password..."
   #systemd-cryptenroll /dev/gpt-auto-root-luks --wipe-slot=password
 
-  rm -rf /home/pascal.brus/.bachrc
+  #rm -rf /home/pascal.brus/.bachrc
   cp /home/pascal.brus/.bashrcBACKUP /home/pascal.brus/.bashrc
 
 

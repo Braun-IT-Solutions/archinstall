@@ -27,7 +27,7 @@ function recoveryKey {
 
 
   #systemctl enable secureBoot2.service
-  rm -rf /home/pascal.brus/.bashrc
+  #rm -rf /home/pascal.brus/.bashrc
   cp /home/pascal.brus/.bashrcBACKUP2 /home/pascal.brus/.bashrc
   cp /home/pascal.brus/.bashrcBACKUP2 /home/pascal.brus/.bashrcBACKUP
 
