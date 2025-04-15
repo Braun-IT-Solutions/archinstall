@@ -64,7 +64,7 @@ FLAG=$(cat "/home/pascal.brus/tmp.txt")
 
 }
 
-set -eo pipefail
+#set -eo pipefail
 #checkSetupMode
 checkForFile
 set +eo
