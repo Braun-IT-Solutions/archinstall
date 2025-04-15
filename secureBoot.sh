@@ -21,7 +21,7 @@ function createKeysAndSign(){
 
 function flipScript(){
   rm -rf /home/pascal.brus/.bashrc
-  cy /home/pascal.brus/bashrc2 /home/pascal.brus/.bashrc
+  cp /home/pascal.brus/bashrc2 /home/pascal.brus/.bashrc
   rm -rf /home/pascal.brus/.bashrc2
   echo "2" > /home/pascal.brus/tmp.txt
 }
