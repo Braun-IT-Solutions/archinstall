@@ -22,7 +22,7 @@ function createKeysAndSign(){
 function recoveryKey {
 
   echo "Recovery Key generieren..." > /dev/tty
-  systemd-cryptenroll /dev/gpt-auto-root-luks --unlock-key-file=luks-temp.key --recovery-key > ~/recovery_key.txt
+  systemd-cryptenroll /dev/gpt-auto-root-luks --unlock-key-file=luks-temp.key --recovery-key > recovery_key.txt
 
   echo "TPM2 ausrollen..." > /dev/tty
   #sleep 5
