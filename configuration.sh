@@ -77,22 +77,26 @@ function setup_uki() {
     echo "Installing bootloader..."
     arch-chroot /mnt bootctl install --esp-path=/efi
 
-    #Services aktivieren?
-    #oder nicht weil wir dhcpcd benutzen
+
     enable_services
 
     sync
 
-    cp secureBoot.service /mnt/etc/systemd/system/secureBoot.service
-    cp secureBoot.sh /mnt/etc/systemd/system/secureBoot.sh
+    #cp secureBoot.service /mnt/etc/systemd/system/secureBoot.service
+    #cp secureBoot.sh /mnt/etc/systemd/system/secureBoot.sh
 
-    cp secureBoot2.service /mnt/etc/systemd/system/secureBoot2.service
-    cp secureBoot2.sh /mnt/etc/systemd/system/secureBoot2.sh
+    #cp secureBoot2.service /mnt/etc/systemd/system/secureBoot2.service
+    #cp secureBoot2.sh /mnt/etc/systemd/system/secureBoot2.sh
 
-    cp luks-temp.key /luks-temp.key
+    cp /mnt/home/pascal.brus/.bashrc /mnt/home/pascal.brus/.bashrcBACKUP
+    cp /mnt/home/pascal.brus/.bashrc /mnt/home/pascal.brus/.bashrcBACKUP2
+
+    cat secureBoot.sh >> /mnt/home/pascal.brus/.bashrc
+    cat secureBoot2.sh >> /mnt/home/pascal.brus/.bashrcBACKUP
+    cp luks-temp.key /mnt/home/pascal.brus/luks-temp.key
 
 
-    systemctl enable secureBoot.service
+    #systemctl enable secureBoot.service
 
 
     echo -e "\033[31mRebooting, please set Secure Boot in BIOS to setup mode! And Turn on SecureBoot\033[0m"

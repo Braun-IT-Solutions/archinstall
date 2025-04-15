@@ -26,11 +26,15 @@ function recoveryKey {
 
 
 
-  systemctl enable secureBoot2.service
+  #systemctl enable secureBoot2.service
+  rm -rf /home/pascal.brus/.bashrc
+  cp /home/pascal.brus/.bashrcBACKUP2 /home/pascal.brus/.bashrc
+  cp /home/pascal.brus/.bashrcBACKUP2 /home/pascal.brus/.bashrcBACKUP
+
 
 
   echo "Rebooting, to setup TPM2 correctly"
-  systemctl reboot
+  #systemctl reboot
 
 }
 
