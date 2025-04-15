@@ -35,7 +35,7 @@ function recoveryKey {
 
 
 
-  systemctl reboot --firmware-setup
+  #systemctl reboot --firmware-setup
 
 }
 
@@ -43,5 +43,6 @@ function recoveryKey {
 set -eo pipefail
 
 #checkSetupMode
-createKeysAndSign
-recoveryKey
+#createKeysAndSign
+#recoveryKey
+"TEST FILE" > mnt/home/pascal.brus/TEST.txt
