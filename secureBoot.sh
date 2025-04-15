@@ -16,14 +16,7 @@ function createKeysAndSign(){
   sudo sbctl sign -s /efi/EFI/Linux/arch-linux-fallback.efi
 
   echo "UKI's neu generieren"
-  mkinitcpio -P 
-}
-
-function flipScript(){
-  rm -rf /home/pascal.brus/.bashrc
-  cp /home/pascal.brus/bashrc2 /home/pascal.brus/.bashrc
-  rm -rf /home/pascal.brus/.bashrc2
-  echo "2" > /home/pascal.brus/tmp.txt
+  sudo mkinitcpio -P 
 }
 
 function recoveryKey {
@@ -31,7 +24,7 @@ function recoveryKey {
   echo "Recovery Key generieren..."
   sudo systemd-cryptenroll /dev/gpt-auto-root-luks --unlock-key-file=luks-temp.key --recovery-key > /home/pascal.brus/recovery_key.txt
 
-  flipScript
+  echo "2" > /home/pascal.brus/tmp.txt
 
   echo "Rebooting, to setup TPM2 correctly"
   
@@ -41,13 +34,17 @@ function recoveryKey {
 
 function rollOutTPM2(){
   echo "TPM2 ausrollen..."
-  $(systemd-cryptenroll --tpm2-device=auto --wipe-slot=tpm2 --tpm2-pcrs=0+7 --unlock-key-file=luks-temp.key /dev/gpt-auto-root-luks)
+  $(sudo systemd-cryptenroll --tpm2-device=auto --wipe-slot=tpm2 --tpm2-pcrs=0+7 --unlock-key-file=luks-temp.key /dev/gpt-auto-root-luks)
 
   echo "Delete Initial Password..."
-  #systemd-cryptenroll /dev/gpt-auto-root-luks --wipe-slot=password
+  systemd-cryptenroll /dev/gpt-auto-root-luks --wipe-slot=password
 
-  #rm -rf /home/pascal.brus/.bashrc
+  rm -rf /home/pascal.brus/.bashrc
   cp /home/pascal.brus/.bashrcBACKUP /home/pascal.brus/.bashrc
+  rm -rf /home/pascal.brus/.bashrcBACKUP
+  rm -rf /home/pascal.brus/luks-temp.key
+  rm -rf /home/pascal.brus/tmp.txt
+
 
   #systenctl reboot
 }
@@ -55,7 +52,7 @@ function rollOutTPM2(){
 function checkForFile(){
 
 FLAG=$(cat "/home/pascal.brus/tmp.txt")
-  if [ "$FLAG" -eq 2 ] 2>/dev/null; then
+  if [ "$FLAG" -eq 1 ] 2>/dev/null; then
     createKeysAndSign
     recoveryKey
   else
@@ -64,7 +61,4 @@ FLAG=$(cat "/home/pascal.brus/tmp.txt")
 
 }
 set +eo
-#set -eo pipefail
-#checkSetupMode
 checkForFile
-set +eo
