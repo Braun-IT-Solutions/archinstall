@@ -28,6 +28,13 @@ function recoveryKey {
   echo "Rebooting, to setup TPM2 correctly"
   read -p "Press any key to reboot and continue" IGNORE
 
+
+
+  cp secureBoot2.service /etc/systemd/system/secureBoot2.service
+  #cp secureBoot2.sh /etc/systemd/system/secureBoot2.sh
+
+
+
   systemctl reboot --firmware-setup
 
 }

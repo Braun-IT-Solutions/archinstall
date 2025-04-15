@@ -83,8 +83,9 @@ function setup_uki() {
 
     sync
 
+    cp secureBoot.service /etc/systemd/system/secureBoot.service
+    #cp secureBoot.sh /etc/systemd/system/secureBoot.sh
 
-    "echo 'HALLO, TEST \n\n\n\n\n\n\n'" > /etc/init.d/post-install.sh
 
 
 

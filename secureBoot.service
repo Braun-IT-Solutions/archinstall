@@ -1,0 +1,9 @@
+[Unit]
+Description=Setup for SecureBoot and TPM2
+
+[Service]
+Type=oneshot
+ExecStart=/etc/systemd/system/secureBoot.sh
+
+[Install]
+WantedBy=multi-user.target
