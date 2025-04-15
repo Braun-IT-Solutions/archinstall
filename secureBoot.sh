@@ -25,22 +25,15 @@ function recoveryKey {
   systemd-cryptenroll /dev/gpt-auto-root-luks --unlock-key-file=luks-temp.key --recovery-key > /home/pascal.brus/recovery_key.txt
 
 
-
-  #systemctl enable secureBoot2.service
-  #rm -rf /home/pascal.brus/.bashrc
-  cp /home/pascal.brus/.bashrcBACKUP2 /home/pascal.brus/.bashrc
-  cp /home/pascal.brus/.bashrcBACKUP2 /home/pascal.brus/.bashrcBACKUP
-
-
-
   echo "Rebooting, to setup TPM2 correctly"
   #systemctl reboot
 
 }
 
-
 set -eo pipefail
 
 #checkSetupMode
-#createKeysAndSign
-#recoveryKey
+createKeysAndSign
+recoveryKey
+
+set +eo
