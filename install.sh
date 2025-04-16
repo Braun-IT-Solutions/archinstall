@@ -1,22 +1,8 @@
 #!/usr/bin/bash
 
-# TODOS for Pascal
-#DONE?  - set -e should actually do something
-#DONE? - Validation for disk user selection seems to not work with spaces
-# - Maybe add checks for arguments in functions
-# - Research mechanism to allow post-install script to run automagically
-
-set -eo pipefail
-
-function was_successfull() {
-    if [ $? -ne 0 ]; then
-        echo "Error: Command failed. Exiting."
-        exit 1
-    fi
-}
-
+#Prints BITS-ASCI logo...
 function print_logo() {
-    echo -e ' $$$$$$$\  $$$$$$\ $$$$$$$$\  $$$$$$\' "\n" \
+    echo -e '\n\n $$$$$$$\  $$$$$$\ $$$$$$$$\  $$$$$$\' "\n" \
         '$$  __$$\ \_$$  _|\__$$  __|$$  __$$\' "\n" \
         '$$ |  $$ |  $$ |     $$ |   $$ /  \__|' "\n" \
         '$$$$$$$\ |  $$ |     $$ |   \$$$$$$\' "\n" \
@@ -27,6 +13,7 @@ function print_logo() {
     echo -e "\nWelcome to BITS archinstall\n"
 } 
 
+#Function to ask for user detail. User details are gonna be used to automatically set Login-name and Hostname
 function ask_user_for_details() {
     echo "Please enter some basic info:" > /dev/tty
     read -p "Your first name (all lowercase): " FIRST_NAME
@@ -36,15 +23,17 @@ function ask_user_for_details() {
     echo "$FIRST_NAME $LAST_NAME $LUCKY_NUMBER"
 }
 
+#Catches errors and stops the script early
+set -eo pipefail
+
 print_logo
 
-
+#Setup for Login-name and Hostname for use in ./configuration
 IFS=' '
 USER_DETAILS=($(ask_user_for_details))
 FIRST_NAME=${USER_DETAILS[0]}
 LAST_NAME=${USER_DETAILS[1]}
 LUCKY_NUMBER=${USER_DETAILS[2]}
-
 
 LOGIN_NAME="$FIRST_NAME.$LAST_NAME"
 echo "Login name: $LOGIN_NAME"
