@@ -154,7 +154,7 @@ function setup_uki() {
     echo "1" > /mnt/home/$1/tmp.txt
 
     cp luks-temp.key /mnt/home/$1/luks-temp.key
-    chmod 400 luks-temp.key
+    chmod 400 /mnt/home/$1/luks-temp.key
 
 
 OUTPUT='╔═══════════════════════════════════════════════════════════════════════════════════╗
