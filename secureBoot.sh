@@ -94,7 +94,7 @@ function rollOutTPM2(){
 
 
   OUTPUT="Rebooting to finalize TPM2 rollout..."
-  printColor "$OUTPUT" RED
+  printColor "$OUTPUT" GREEN
 
   OUTPUT="Press any key to reboot and continue..."
   printColor "$OUTPUT" CYAN
