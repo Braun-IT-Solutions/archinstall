@@ -17,11 +17,11 @@ function print_logo() {
 function ask_user_for_details() {
 
 
-    OUTPUT="\
-    ╔═══════════════════════════════╗\n\
-    ║ Please enter some basic info: ║\n\
-    ╚═══════════════════════════════╝\n"
-    echo -e $(printColor "$OUTPUT" "RED")
+    OUTPUT='╔═══════════════════════════════╗' "\n" \
+    '║ Please enter some basic info: ║' "\n" \
+    '╚═══════════════════════════════╝'
+    FORMATTED=$(printColor "$OUTPUT" "RED")
+    echo -e "$FORMATTED"
     OUTPUT="Please enter some basic info:\n"
     echo -e $(printColor "$OUTPUT" RED) > /dev/tty
 
