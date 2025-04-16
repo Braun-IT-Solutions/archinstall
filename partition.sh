@@ -114,15 +114,15 @@ function format_disk() {
 #Mounts EFI and ROOT Partition
 function mount_filesystem() {
 
-    OUTPUT="Mounting ${1} to /mnt/efi..."
-    printColor "$OUTPUT" GREEN
-    #EFI
-    mount --mkdir $1 /mnt/efi
-
     OUTPUT="Mounting /dev/mapper/linuxroot to /mnt..."
     printColor "$OUTPUT" GREEN
     #ROOT
     mount /dev/mapper/linuxroot /mnt
+
+    OUTPUT="Mounting ${1} to /mnt/efi..."
+    printColor "$OUTPUT" GREEN
+    #EFI
+    mount --mkdir $1 /mnt/efi
 }
 
 #Catches errors and stops the script early

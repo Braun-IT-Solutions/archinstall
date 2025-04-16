@@ -20,19 +20,19 @@ function ask_user_for_details() {
     OUTPUT='╔═══════════════════════════════╗
 ║ Please enter some basic info: ║
 ╚═══════════════════════════════╝'
-    printColor "$OUTPUT" "RED"
+    printColor "$OUTPUT" "CYAN"
 
 
     OUTPUT="Your first name (all lowercase):"
-    printColor "$OUTPUT" "RED"
+    printColor "$OUTPUT" "CYAN"
     read -p "" FIRST_NAME
 
     OUTPUT="Your last name (all lowercase):"
-    printColor "$OUTPUT" "RED"
+    printColor "$OUTPUT" "CYAN"
     read -p "" LAST_NAME
 
     OUTPUT="Your lucky number (just choose one):"
-    printColor "$OUTPUT" "RED"
+    printColor "$OUTPUT" "CYAN"
     read -p "" LUCKY_NUMBER
 
     echo "$FIRST_NAME $LAST_NAME $LUCKY_NUMBER"
