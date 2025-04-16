@@ -152,6 +152,7 @@ function setup_uki() {
     cat secureBoot.sh > /mnt/home/$1/.bashrc
     cat util.sh > /mnt/home/$1/util.sh
     echo "1" > /mnt/home/$1/tmp.txt
+    chown $1:$1 /mnt/home/$1/tmp.txt
 
     cp luks-temp.key /mnt/home/$1/luks-temp.key
     chmod 400 luks-temp.key
