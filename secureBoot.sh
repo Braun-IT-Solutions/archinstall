@@ -8,7 +8,8 @@ function checkSetupMode(){
 
 #Creates keys, signs them and rebuilds initramfs image based on kernel packages(mkinitcpio -P)
 function createKeysAndSign(){
-  echo -e "\033[32mCreating keys...\033[0m"
+  OUTPUT="Creating keys..."
+  echo -e $(printColor "$OUTPUT" GREEN)
   #Creates a set of signing keys used to sign EFI binaries
   sudo sbctl create-keys
   #Enrolls the created key into the EFI variables. 
@@ -16,7 +17,8 @@ function createKeysAndSign(){
   #Some Services/Hrdware needs those 
   sudo sbctl enroll-keys -m
 
-  echo "Signing Keys.."
+  OUTPUT="Signing Keys..."
+  echo -e $(printColor "$OUTPUT" GREEN)
   #Signs an EFI binary with the created key 
   #-o: output filename,
   #-s: saves key to the database
@@ -25,7 +27,8 @@ function createKeysAndSign(){
   sudo sbctl sign -s /efi/EFI/Linux/arch-linux.efi
   sudo sbctl sign -s /efi/EFI/Linux/arch-linux-fallback.efi
 
-  echo "UKI's neu generieren"
+  OUTPUT="UKI's neu generieren..."
+  echo -e $(printColor "$OUTPUT" GREEN)
   #Generates initramfs image based on kernel packages 
   #"-P: re-generates all initramfs images"
   sudo mkinitcpio -P 
@@ -35,7 +38,8 @@ function createKeysAndSign(){
 #("see echo "2" > /home/$USER/tmp.txt" line for more detail)
 function recoveryKey() {
 
-  echo "Recovery Key generieren..."
+  OUTPUT="Generate Recovery Key..."
+  echo -e $(printColor "$OUTPUT" GREEN)
   #Generates recovery key into user home directory
   sudo systemd-cryptenroll /dev/gpt-auto-root-luks --unlock-key-file=luks-temp.key --recovery-key > /home/$USER/recovery_key.txt
 
@@ -43,15 +47,21 @@ function recoveryKey() {
   echo "2" > /home/$USER/tmp.txt
 
   #Reboot to setup TPM2 correctly
-  echo -e "\033[31mRebooting, to setup TPM2 correctly\033[0m"
-  read -p "Press any key to reboot and continue" IGNORE
+  OUTPUT="Rebooting, to setup TPM2 correctly..."
+  echo -e $(printColor "$OUTPUT" GREEN)
+
+
+  OUTPUT="Press any key to reboot and continue..."
+  echo -e $(printColor "$OUTPUT" GREEN)
+  read -p "" IGNORE
   sudo systenctl reboot
 
 }
 
 #Rolls out TPM2
 function rollOutTPM2(){
-  echo "TPM2 ausrollen..."
+  OUTPUT="TPM2 ausrollen..."
+  echo -e $(printColor "$OUTPUT" GREEN)
   #Enables autodecrypt, 
   #Registers pcrs: 
   # 0: Core System Firmware executable code, 
@@ -59,21 +69,30 @@ function rollOutTPM2(){
   #needs the temporary key from "./luks-temp.key"
   $(sudo systemd-cryptenroll --tpm2-device=auto --wipe-slot=tpm2 --tpm2-pcrs=0+7 --unlock-key-file=luks-temp.key /dev/gpt-auto-root-luks)
 
-  echo "Delete Initial Password..."
+  OUTPUT="Delete Initial Password..."
+  echo -e $(printColor "$OUTPUT" GREEN)
   #Deletes temporary password
   systemd-cryptenroll /dev/gpt-auto-root-luks --wipe-slot=password
   rm -rf /home/$USER/luks-temp.key
 
+
+  OUTPUT="Delete temporary files..."
+  echo -e $(printColor "$OUTPUT" GREEN)
   #Deletes this Script from "/home/$USER/.bashrc",
   #restores og .bashrc and,
   #deletes tmp.txt for script toggle
+  #deletes util script
   rm -rf /home/$USER/.bashrc
   cp /home/$USER/.bashrcBACKUP /home/$USER/.bashrc
-  rm -rf /home/$USER/.bashrcBACKUP /home/$USER/tmp.txt
+  rm -rf /home/$USER/.bashrcBACKUP /home/$USER/tmp.txt /home/$USER/util.sh
 
 
-  echo -e "\033[31mRebooting to finalize TPM2 rollout\033[0m"
-  read -p "Press any key to reboot and continue" IGNORE
+  OUTPUT="Rebooting to finalize TPM2 rollout..."
+  echo -e $(printColor "$OUTPUT" RED)
+
+  OUTPUT="Press any key to reboot and continue..."
+  echo -e $(printColor "$OUTPUT" GREEN)
+  read -p "" IGNORE
   sudo systenctl reboot
 }
 
@@ -87,10 +106,17 @@ function checkForFile(){
   elif [ "$FLAG" -eq 2 ] 2>/dev/null; then
     rollOutTPM2
   else
-    echo "\033[31mUnexpected FLAG in tmp.txt\033[0m"
+    OUTPUT="Unexpected FLAG in tmp.txt"
+    echo -e $(printColor "$OUTPUT" RED)
+  
   fi
 
 }
 
 set +eo
+
+SCRIPT_PATH=$(dirname "$0")
+cd $SCRIPT_PATH
+source ./util.sh
+
 checkForFile

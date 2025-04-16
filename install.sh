@@ -15,16 +15,36 @@ function print_logo() {
 
 #Function to ask for user detail. User details are gonna be used to automatically set Login-name and Hostname
 function ask_user_for_details() {
-    echo "Please enter some basic info:" > /dev/tty
-    read -p "Your first name (all lowercase): " FIRST_NAME
-    read -p "Your last name (all lowercase): " LAST_NAME
-    read -p "Your lucky number (just choose one): " LUCKY_NUMBER
 
-    echo "$FIRST_NAME $LAST_NAME $LUCKY_NUMBER"
+
+    OUTPUT="\
+    ╔═══════════════════════════════╗\n\
+    ║ Please enter some basic info: ║\n\
+    ╚═══════════════════════════════╝\n"
+    echo -e $(printColor "$OUTPUT" "RED")
+    OUTPUT="Please enter some basic info:\n"
+    echo -e $(printColor "$OUTPUT" RED)
+
+
+    OUTPUT="Your first name (all lowercase):"
+    echo -e $(printColor "$OUTPUT" "RED")
+    read -p "" FIRST_NAME
+
+    OUTPUT="Your last name (all lowercase):"
+    echo -e $(printColor "$OUTPUT" "RED")
+    read -p "" LAST_NAME
+
+    OUTPUT="Your lucky number (just choose one):"
+    echo -e $(printColor "$OUTPUT" "RED")
+    read -p "" LUCKY_NUMBER
 }
 
 #Catches errors and stops the script early
 set -eo pipefail
+
+SCRIPT_PATH=$(dirname "$0")
+cd $SCRIPT_PATH
+source ./util.sh
 
 print_logo
 
@@ -36,11 +56,14 @@ LAST_NAME=${USER_DETAILS[1]}
 LUCKY_NUMBER=${USER_DETAILS[2]}
 
 LOGIN_NAME="$FIRST_NAME.$LAST_NAME"
-echo "Login name: $LOGIN_NAME"
+OUTPUT="Login name: $LOGIN_NAME"
+echo -e $(printColor "$OUTPUT" GREEN)
 
 INITIALS="${FIRST_NAME:0:1}${LAST_NAME:0:1}"
 HOSTNAME="AXD-${INITIALS^^}${LUCKY_NUMBER}"
-echo "Hostname: ${HOSTNAME}"
+OUTPUT="Hostname: ${HOSTNAME}"
+echo -e $(printColor "$OUTPUT" GREEN)
+sleep 1
 
 ./partition.sh
 

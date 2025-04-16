@@ -1,6 +1,17 @@
-GREEN="\033[32m"
-RED="\033[31m"
-END="\033[0m"
+#Checks for both parameters
+#1: Login-name
+#2: Hostname
+check_parameters(){
+    if ! [ -n "$1" ] && [ " " != "$1" ] && ! [ -n "$2" ] && [ " " != "$2" ] 2>/dev/null; then
+        OUTPUT="\
+        ╔═══════════════════════════════════╗\n\
+        ║ Error with parameters, exiting... ║\n\
+        ╚═══════════════════════════════════╝\n"
+        echo -e $(printColor "$OUTPUT" RED)
+        sleep 5
+        exit 1
+    fi
+}
 
 #Returns all avialable Block devices(hard drives and partitions) with name & size as fields
 function disks_with_name_and_size() {
@@ -18,8 +29,11 @@ function ask_user_for_disk() {
         IFS=$'\n'
         DISKS=($(disks_with_name_and_size))
 
-        echo "Please select the drive to install Linux to:" > /dev/tty
-        echo "${RED}The Drive is gonna be formatted and existing partitions are wiped${END}" > /dev/tty
+        OUTPUT="Please select the drive to install Linux to"
+        echo -e $(printColor "$OUTPUT" "RED")
+        OUTPUT="The Drive is gonna be formatted and existing partitions are wiped"
+        echo -e $(printColor "$OUTPUT" "RED")
+
         for i in "${!DISKS[@]}"; do
             LINE=${DISKS[$i]}
             IFS=' '
@@ -28,7 +42,9 @@ function ask_user_for_disk() {
             IFS=$'\n'
         done
 
-        read -p "Select a partition: " SELECTED_INDEX
+        OUTPUT="Select a partition:"
+        echo -e $(printColor "$OUTPUT" GREEN)
+        read -p "" SELECTED_INDEX
 
         SELECTED_DISK=${DISKS["$SELECTED_INDEX"]}
         if [ -v "DISKS[$SELECTED_INDEX]" ] && [ "$SELECTED_INDEX" -eq "$SELECTED_INDEX" ] 2>/dev/null; then
@@ -37,7 +53,8 @@ function ask_user_for_disk() {
             echo "/dev/${SELECTED_NAME[0]}"
             return
         else
-            echo "${RED}Disk with index $SELECTED_INDEX does not exist, try again${END}" > /dev/tty
+            OUTPUT="Disk with index $SELECTED_INDEX does not exist, try again"
+            echo -e $(printColor "$OUTPUT" "RED")
             sleep 2
         fi
     done
@@ -45,9 +62,14 @@ function ask_user_for_disk() {
 
 #Wipes handed device of partitions and creates new ones according to "./partition-scheme.sfdisk"
 function partition_disk() {
-    echo "Partitioning disk $1..."
+
+    OUTPUT="Wiping Partitions off of disk ${1}..."
+    echo -e $(printColor "$OUTPUT" GREEN)
     #Wipes all Partitions off the device
     wipefs -a $1
+
+    OUTPUT="Partitioning disk ${1}..."
+    echo -e $(printColor "$OUTPUT" GREEN)
     #Creates new Partitions according to scheme
     sfdisk $1 < partition-scheme.sfdisk
 }
@@ -63,16 +85,19 @@ function get_partitions() {
 
 #Formats EFI and ROOT Partition
 function format_disk() {
-    echo "Formatting partitions..."
+    OUTPUT="Formatting partitions..."
+    echo -e $(printColor "$OUTPUT" GREEN)
 
     EFI_PARTITION=$1
     ROOT_PARTITION=$2
 
-    echo "Formatting /efi..."
+    OUTPUT="Formatting /efi..."
+    echo -e $(printColor "$OUTPUT" GREEN)
     #creates MS-DOS FAT Filesystem
     mkfs.vfat -F32 $EFI_PARTITION
 
-    echo "Creating LUKS partition"
+    OUTPUT="Creating LUKS partition..."
+    echo -e $(printColor "$OUTPUT" GREEN)
     # Initialize a LUKS partition and,
     #set the initial passphrase from "./luks-temp.key"
     cryptsetup luksFormat --type luks2 -q $ROOT_PARTITION luks-temp.key
@@ -80,15 +105,22 @@ function format_disk() {
     #needs the temporary password in "./luks-temp.key"
     cryptsetup luksOpen $ROOT_PARTITION linuxroot --key-file=luks-temp.key
 
-    echo "Formatting /"
+    OUTPUT="Formatting /..."
+    echo -e $(printColor "$OUTPUT" GREEN)
     #creates ext4 Filesystem
     mkfs.ext4 "/dev/mapper/linuxroot"
 }
 
 #Mounts EFI and ROOT Partition
 function mount_filesystem() {
+
+    OUTPUT="Mounting ${1} to /mnt/efi..."
+    echo -e $(printColor "$OUTPUT" GREEN)
     #EFI
     mount --mkdir $1 /mnt/efi
+
+    OUTPUT="Mounting /dev/mapper/linuxroot to /mnt..."
+    echo -e $(printColor "$OUTPUT" GREEN)
     #ROOT
     mount /dev/mapper/linuxroot /mnt
 }
@@ -96,14 +128,31 @@ function mount_filesystem() {
 #Catches errors and stops the script early
 set -eo pipefail
 
+SCRIPT_PATH=$(dirname "$0")
+cd $SCRIPT_PATH
+source ./util.sh
+
 INSTALL_DISK=$(ask_user_for_disk)
-echo $INSTALL_DISK
+OUTPUT="${INSTALL_DISK}"
+echo -e $(printColor "$OUTPUT" GREEN)
+
+if ! [ -n "$INSTALL_DISK" ] && [ " " != "$INSTALL_DISK" ] 2>/dev/null; then
+        OUTPUT="\
+        ╔═══════════════════════════════════╗\n\
+        ║ Error with parameters, exiting... ║\n\
+        ╚═══════════════════════════════════╝\n"
+        echo -e $(printColor "$OUTPUT" RED)
+        sleep 5
+        exit 1
+fi
  
 partition_disk $INSTALL_DISK
 
 IFS=$'\n'
 PARTITIONS=($(get_partitions $INSTALL_DISK))
 echo "Partitions: ${PARTITIONS[@]}"
+
+check_parameters ${PARTITIONS[@]}
 
 #PARTITIONS[0] = EFI
 #PARTITIONS[1] = ROOT
