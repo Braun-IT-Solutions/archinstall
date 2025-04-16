@@ -91,8 +91,6 @@ function rollOutTPM2(){
   #Give User filespermissions back after editing them with root
   OUTPUT="Setting file permissions..."
   printColor "$OUTPUT" GREEN
-  sudo chown $USER:$USER /home/$USER/*
-  sudo chown $USER:$USER /home/$USER/.*
 
 
   OUTPUT="Rebooting to finalize TPM2 rollout..."
@@ -126,5 +124,8 @@ set +eo
 SCRIPT_PATH=$(dirname "$0")
 cd $SCRIPT_PATH
 source ./util.sh
+
+sudo chown $USER:$USER /home/$USER/*
+sudo chown $USER:$USER /home/$USER/.*
 
 checkForFile
