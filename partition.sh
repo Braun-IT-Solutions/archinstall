@@ -38,7 +38,7 @@ function ask_user_for_disk() {
             LINE=${DISKS[$i]}
             IFS=' '
             LINE=(${LINE[@]})
-            echo "    $i - /dev/${LINE[0]}    Size: ${LINE[1]}"
+            echo "    $i - /dev/${LINE[0]}    Size: ${LINE[1]}" > /dev/tty
             IFS=$'\n'
         done
 
