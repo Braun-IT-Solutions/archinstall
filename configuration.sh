@@ -77,8 +77,8 @@ function create_user() {
     arch-chroot /mnt useradd -G wheel -m $1
     echo $DEFAULT_PASSWORD | arch-chroot /mnt passwd $1 --stdin
     
-    OUTPUT="Your initial password is \033[1m$DEFAULT_PASSWORD"
-    printColor "$OUTPUT" RED
+    OUTPUT="Your initial password is \033[96m$DEFAULT_PASSWORD"
+    printColor "$OUTPUT" CYAN
     sleep 5
 }
 
@@ -163,7 +163,7 @@ OUTPUT='╔═══════════════════════
     printColor "$OUTPUT" "CYAN"
 
     OUTPUT="Press any key to reboot and continue..."
-    printColor "$OUTPUT" RED
+    printColor "$OUTPUT" CYAN
     read -p "" IGNORE
     systemctl reboot --firmware-setup
 }
