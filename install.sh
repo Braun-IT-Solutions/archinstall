@@ -22,8 +22,6 @@ function ask_user_for_details() {
     '╚═══════════════════════════════╝'
     FORMATTED=$(printColor "$OUTPUT" "RED")
     echo -e "$FORMATTED"
-    OUTPUT="Please enter some basic info:\n"
-    echo -e $(printColor "$OUTPUT" RED) > /dev/tty
 
 
     OUTPUT="Your first name (all lowercase):"
@@ -39,12 +37,12 @@ function ask_user_for_details() {
     read -p "" LUCKY_NUMBER
 }
 
-#Catches errors and stops the script early
-set -eo pipefail
-
 SCRIPT_PATH=$(dirname "$0")
 cd $SCRIPT_PATH
 source ./util.sh
+
+#Catches errors and stops the script early
+set -eo pipefail
 
 print_logo
 
