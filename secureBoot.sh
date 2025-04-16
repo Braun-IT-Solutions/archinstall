@@ -43,7 +43,9 @@ function recoveryKey() {
   #Generates recovery key into user home directory
   sudo systemd-cryptenroll /dev/gpt-auto-root-luks --unlock-key-file=luks-temp.key --recovery-key > /home/$USER/recovery_key.txt
 
+
   #replaces tmp.txt with "2" flag to make sure the script runs again after reboot from the correct point
+  chown $USER:$USER /mnt/home/$USER/tmp.txt
   echo "2" > /home/$USER/tmp.txt
 
   #Reboot to setup TPM2 correctly
