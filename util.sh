@@ -8,12 +8,12 @@ function printColor(){
   if [[ -n $1 ]] && [[ -n $2 ]]; then
     if [[ $2 == "GREEN" ]]; then
       RETURN="${GREEN}${1}${END}"
-      echo -e "${RETURN}"
+      echo -e "${RETURN}" > /dev/tty
     elif [[ $2 == "RED" ]]; then
       RETURN="${RED}${1}${END}"
-      echo -e "${RETURN}"
+      echo -e "${RETURN}" > /dev/tty
     else
-      echo -e "${1}"
+      echo -e "${1}" > /dev/tty
     fi
   fi
 }

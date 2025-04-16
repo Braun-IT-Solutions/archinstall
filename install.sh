@@ -18,8 +18,8 @@ function ask_user_for_details() {
 
 
     OUTPUT='╔═══════════════════════════════╗
-    ║ Please enter some basic info: ║
-    ╚═══════════════════════════════╝'
+║ Please enter some basic info: ║
+╚═══════════════════════════════╝'
     printColor "$OUTPUT" "RED"
 
 
@@ -34,6 +34,8 @@ function ask_user_for_details() {
     OUTPUT="Your lucky number (just choose one):"
     printColor "$OUTPUT" "RED"
     read -p "" LUCKY_NUMBER
+
+    echo "$FIRST_NAME $LAST_NAME $LUCKY_NUMBER"
 }
 
 SCRIPT_PATH=$(dirname "$0")
