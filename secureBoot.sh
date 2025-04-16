@@ -86,6 +86,12 @@ function rollOutTPM2(){
   cp /home/$USER/.bashrcBACKUP /home/$USER/.bashrc
   sudo rm -rf /home/$USER/.bashrcBACKUP /home/$USER/tmp.txt /home/$USER/util.sh
 
+  #Give User filespermissions back after editing them with root
+  OUTPUT="Setting file permissions..."
+  printColor "$OUTPUT" GREEN
+  sudo chown $USER:$USER /home/$USER/*
+  sudo chown $USER:$USER /home/$USER/.*
+
 
   OUTPUT="Rebooting to finalize TPM2 rollout..."
   printColor "$OUTPUT" RED
