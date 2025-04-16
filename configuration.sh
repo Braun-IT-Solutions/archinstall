@@ -156,11 +156,10 @@ function setup_uki() {
     chmod go-r luks-temp.key
 
 
-    OUTPUT="\
-    ╔═════════════════════════════════════════════════════════════════════════════════╗\n\
-    ║ Rebooting, please set Secure-Boot in BIOS to setup mode! And tsurn on Secure-Boot ║\n\
-    ╚═════════════════════════════════════════════════════════════════════════════════╝\n"
-    printColor "$OUTPUT" "RED"
+OUTPUT='╔═══════════════════════════════════════════════════════════════════════════════════╗
+║ Rebooting, please set Secure-Boot in BIOS to setup mode! And tsurn on Secure-Boot ║
+╚═══════════════════════════════════════════════════════════════════════════════════╝'
+    printColor "$OUTPUT" "CYAN"
 
     OUTPUT="Press any key to reboot and continue..."
     printColor "$OUTPUT" RED
