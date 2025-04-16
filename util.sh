@@ -2,7 +2,7 @@
 GREEN="\033[32m"
 RED="\033[31m"
 END="\033[0m"
-CYAN="\036[0m"
+CYAN="\033[32m"
 
 
 #Returns String with red or green prefix, can be echo'ed with -e flag, default to white
