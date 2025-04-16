@@ -54,7 +54,7 @@ function recoveryKey() {
   OUTPUT="Press any key to reboot and continue..."
   printColor "$OUTPUT" GREEN
   read -p "" IGNORE
-  sudo systenctl reboot
+  sudo systemctl reboot
 
 }
 
