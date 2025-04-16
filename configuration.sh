@@ -8,7 +8,7 @@ check_parameters(){
         ╔═══════════════════════════════════╗\n\
         ║ Error with parameters, exiting... ║\n\
         ╚═══════════════════════════════════╝\n"
-        echo -e $(printColor "$OUTPUT" RED)
+        printColor "$OUTPUT" RED
         sleep 5
         exit 1
     fi
@@ -17,12 +17,12 @@ check_parameters(){
 #Installs basic packages and system files
 function install_linux() {
     OUTPUT="Finding fastest mirrors..."
-    echo -e $(printColor "$OUTPUT" GREEN)
+    printColor "$OUTPUT" GREEN
     #Retrieves and filters the latest pacman mirror list
     reflector --country DE --age 24 --protocol http,https --sort rate --save /etc/pacman.d/mirrorlist
 
     OUTPUT="Installing basic linux..."
-    echo -e $(printColor "$OUTPUT" GREEN)
+    printColor "$OUTPUT" GREEN
     #Packages to install
     PACKAGES="base base-devel linux linux-firmware git nano cryptsetup amd-ucode sbctl sudo htop btop nvtop dhcpcd"
     #Comes preinstalled with arch, designed to create new system installations
@@ -34,17 +34,17 @@ function install_linux() {
 function configure_basics() {
     
     OUTPUT="Settings timezone..."
-    echo -e $(printColor "$OUTPUT" GREEN)
+    printColor "$OUTPUT" GREEN
     #Sets Timezone Berlin
     arch-chroot /mnt ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime
 
     OUTPUT="Setting hardware clock..."
-    echo -e $(printColor "$OUTPUT" GREEN)
+    printColor "$OUTPUT" GREEN
     #Sets the hardwareclock to current system time
     arch-chroot /mnt hwclock --systohc
 
     OUTPUT="Setting locales..."
-    echo -e $(printColor "$OUTPUT" GREEN)
+    printColor "$OUTPUT" GREEN
     
     #Setting german locales and EN-USA as fallback
     sed -i -e "/^#"de_DE.UTF-8"/s/^#//" /mnt/etc/locale.gen
@@ -52,17 +52,17 @@ function configure_basics() {
 
 
     OUTPUT="Setting keymap..."
-    echo -e $(printColor "$OUTPUT" GREEN)
+    printColor "$OUTPUT" GREEN
     #Sets german keyboard
     echo "KEYMAP=de-latin1" > /mnt/etc/vconsole.conf
 
     OUTPUT="Setting hostname..."
-    echo -e $(printColor "$OUTPUT" GREEN)
+    printColor "$OUTPUT" GREEN
     #sets hostname
     echo $1 > /mnt/etc/hostname
 
     OUTPUT="Generating locales..."
-    echo -e $(printColor "$OUTPUT" GREEN)
+    printColor "$OUTPUT" GREEN
     #Generates locales
     arch-chroot /mnt locale-gen
 }
@@ -73,33 +73,33 @@ function create_user() {
     DEFAULT_PASSWORD="root"
 
     OUTPUT="Creating user..."
-    echo -e $(printColor "$OUTPUT" GREEN)
+    printColor "$OUTPUT" GREEN
     arch-chroot /mnt useradd -G wheel -m $1
     echo $DEFAULT_PASSWORD | arch-chroot /mnt passwd $1 --stdin
     
     OUTPUT="Your initial password is \033[1m$DEFAULT_PASSWORD"
-    echo -e $(printColor "$OUTPUT" RED)
+    printColor "$OUTPUT" RED
     sleep 5
 }
 
 #Configures sudo to not need password
 function configure_sudo() {
     OUTPUT="Configuring sudo..."
-    echo -e $(printColor "$OUTPUT" GREEN)
+    printColor "$OUTPUT" GREEN
     sed -i -e '/^# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/s/^# //' /mnt/etc/sudoers
 }
 
 #Enables systemd & dhcpcd services
 function enable_services() {
     OUTPUT="Enabling systemd services..."
-    echo -e $(printColor "$OUTPUT" GREEN)
+    printColor "$OUTPUT" GREEN
     systemctl --root /mnt enable systemd-resolved systemd-timesyncd dhcpcd
 }
 
 #Sets unified kernel images and generates them
 function setup_uki() {
     OUTPUT="Setting up UKI..."
-    echo -e $(printColor "$OUTPUT" GREEN)
+    printColor "$OUTPUT" GREEN
 
     #Sets kernel parameters 
     #"rw: Mount root device read-write on boot"
@@ -107,13 +107,13 @@ function setup_uki() {
     mkdir -p /mnt/efi/EFI/Linux
 
     OUTPUT="Setting mkinitcpio hooks..."
-    echo -e $(printColor "$OUTPUT" GREEN)
+    printColor "$OUTPUT" GREEN
     HOOKS="base systemd autodetect modconf kms keyboard sd-vconsole sd-encrypt block filesystems fsck"
     #Setting our hooks for mkinitcpio
     sed -i -e "s/^HOOKS=.*/HOOKS=($HOOKS)/g" /mnt/etc/mkinitcpio.conf
 
     OUTPUT="Enabling UKI..."
-    echo -e $(printColor "$OUTPUT" GREEN)
+    printColor "$OUTPUT" GREEN
     #Enabling our UKIs
     sed -i -e "s/^default_config=/#default_config=/g" /mnt/etc/mkinitcpio.d/linux.preset
     sed -i -e "s/^default_image=/#default_image=/g" /mnt/etc/mkinitcpio.d/linux.preset
@@ -126,13 +126,13 @@ function setup_uki() {
     sed -i -e "s/^#fallback_options=/fallback_options=/g" /mnt/etc/mkinitcpio.d/linux.preset
 
     OUTPUT="Generating UKI..."
-    echo -e $(printColor "$OUTPUT" GREEN)
+    printColor "$OUTPUT" GREEN
     #Generates initramfs image based on kernel packages 
     #"-P: re-generates all initramfs images"
     arch-chroot /mnt mkinitcpio -P
 
     OUTPUT="Installing bootloader..."
-    echo -e $(printColor "$OUTPUT" GREEN)
+    printColor "$OUTPUT" GREEN
     #Install EFI bootloader 
     #"--esp-path=: path to our efi partition"
     arch-chroot /mnt bootctl install --esp-path=/efi
@@ -143,7 +143,7 @@ function setup_uki() {
     sync
 
     OUTPUT="Setting up temp files..."
-    echo -e $(printColor "$OUTPUT" GREEN)
+    printColor "$OUTPUT" GREEN
 
     cp /mnt/home/$USER/.bashrc /mnt/home/$USER/.bashrcBACKUP
     rm -rf /mnt/home/$USER/.bashrc
@@ -160,10 +160,10 @@ function setup_uki() {
     ╔═════════════════════════════════════════════════════════════════════════════════╗\n\
     ║ Rebooting, please set Secure-Boot in BIOS to setup mode! And tsurn on Secure-Boot ║\n\
     ╚═════════════════════════════════════════════════════════════════════════════════╝\n"
-    echo -e $(printColor "$OUTPUT" "RED")
+    printColor "$OUTPUT" "RED"
 
     OUTPUT="Press any key to reboot and continue..."
-    echo -e $(printColor "$OUTPUT" RED)
+    printColor "$OUTPUT" RED
     read -p "" IGNORE
     systemctl reboot --firmware-setup
 }

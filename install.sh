@@ -10,30 +10,29 @@ function print_logo() {
         '$$ |  $$ |  $$ |     $$ |   $$\   $$ |' "\n" \
         '$$$$$$$  |$$$$$$\    $$ |   \$$$$$$  |' "\n" \
         '\_______/ \______|   \__|    \______/'
-    echo -e "\nWelcome to BITS archinstall\n" > /dev/tty
+    echo -e "\nWelcome to BITS archinstall\n"
 } 
 
 #Function to ask for user detail. User details are gonna be used to automatically set Login-name and Hostname
 function ask_user_for_details() {
 
 
-    OUTPUT='╔═══════════════════════════════╗' "\n" \
-    '║ Please enter some basic info: ║' "\n" \
-    '╚═══════════════════════════════╝'
-    FORMATTED=$(printColor "$OUTPUT" "RED")
-    echo -e "$FORMATTED"
+    OUTPUT='╔═══════════════════════════════╗
+    ║ Please enter some basic info: ║
+    ╚═══════════════════════════════╝'
+    printColor "$OUTPUT" "RED"
 
 
     OUTPUT="Your first name (all lowercase):"
-    echo -e $(printColor "$OUTPUT" "RED") > /dev/tty
+    printColor "$OUTPUT" "RED"
     read -p "" FIRST_NAME
 
     OUTPUT="Your last name (all lowercase):"
-    echo -e $(printColor "$OUTPUT" "RED") > /dev/tty
+    printColor "$OUTPUT" "RED"
     read -p "" LAST_NAME
 
     OUTPUT="Your lucky number (just choose one):"
-    echo -e $(printColor "$OUTPUT" "RED") > /dev/tty
+    printColor "$OUTPUT" "RED"
     read -p "" LUCKY_NUMBER
 }
 
@@ -55,12 +54,12 @@ LUCKY_NUMBER=${USER_DETAILS[2]}
 
 LOGIN_NAME="$FIRST_NAME.$LAST_NAME"
 OUTPUT="Login name: $LOGIN_NAME"
-echo -e $(printColor "$OUTPUT" GREEN) > /dev/tty
+printColor "$OUTPUT" GREEN
 
 INITIALS="${FIRST_NAME:0:1}${LAST_NAME:0:1}"
 HOSTNAME="AXD-${INITIALS^^}${LUCKY_NUMBER}"
 OUTPUT="Hostname: ${HOSTNAME}"
-echo -e $(printColor "$OUTPUT" GREEN) > /dev/tty
+printColor "$OUTPUT" GREEN
 sleep 1
 
 ./partition.sh

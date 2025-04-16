@@ -7,7 +7,7 @@ check_parameters(){
         ╔═══════════════════════════════════╗\n\
         ║ Error with parameters, exiting... ║\n\
         ╚═══════════════════════════════════╝\n"
-        echo -e $(printColor "$OUTPUT" RED)
+        printColor "$OUTPUT" RED
         sleep 5
         exit 1
     fi
@@ -30,20 +30,20 @@ function ask_user_for_disk() {
         DISKS=($(disks_with_name_and_size))
 
         OUTPUT="Please select the drive to install Linux to"
-        echo -e $(printColor "$OUTPUT" "RED")
+        printColor "$OUTPUT" "RED"
         OUTPUT="The Drive is gonna be formatted and existing partitions are wiped"
-        echo -e $(printColor "$OUTPUT" "RED")
+        printColor "$OUTPUT" "RED"
 
         for i in "${!DISKS[@]}"; do
             LINE=${DISKS[$i]}
             IFS=' '
             LINE=(${LINE[@]})
-            echo "    $i - /dev/${LINE[0]}    Size: ${LINE[1]}" > /dev/tty
+            echo "    $i - /dev/${LINE[0]}    Size: ${LINE[1]}"
             IFS=$'\n'
         done
 
         OUTPUT="Select a partition:"
-        echo -e $(printColor "$OUTPUT" GREEN)
+        printColor "$OUTPUT" GREEN
         read -p "" SELECTED_INDEX
 
         SELECTED_DISK=${DISKS["$SELECTED_INDEX"]}
@@ -54,7 +54,7 @@ function ask_user_for_disk() {
             return
         else
             OUTPUT="Disk with index $SELECTED_INDEX does not exist, try again"
-            echo -e $(printColor "$OUTPUT" "RED")
+            printColor "$OUTPUT" "RED"
             sleep 2
         fi
     done
@@ -64,12 +64,12 @@ function ask_user_for_disk() {
 function partition_disk() {
 
     OUTPUT="Wiping Partitions off of disk ${1}..."
-    echo -e $(printColor "$OUTPUT" GREEN)
+    printColor "$OUTPUT" GREEN
     #Wipes all Partitions off the device
     wipefs -a $1
 
     OUTPUT="Partitioning disk ${1}..."
-    echo -e $(printColor "$OUTPUT" GREEN)
+    printColor "$OUTPUT" GREEN
     #Creates new Partitions according to scheme
     sfdisk $1 < partition-scheme.sfdisk
 }
@@ -86,18 +86,18 @@ function get_partitions() {
 #Formats EFI and ROOT Partition
 function format_disk() {
     OUTPUT="Formatting partitions..."
-    echo -e $(printColor "$OUTPUT" GREEN)
+    printColor "$OUTPUT" GREEN
 
     EFI_PARTITION=$1
     ROOT_PARTITION=$2
 
     OUTPUT="Formatting /efi..."
-    echo -e $(printColor "$OUTPUT" GREEN)
+    printColor "$OUTPUT" GREEN
     #creates MS-DOS FAT Filesystem
     mkfs.vfat -F32 $EFI_PARTITION
 
     OUTPUT="Creating LUKS partition..."
-    echo -e $(printColor "$OUTPUT" GREEN)
+    printColor "$OUTPUT" GREEN
     # Initialize a LUKS partition and,
     #set the initial passphrase from "./luks-temp.key"
     cryptsetup luksFormat --type luks2 -q $ROOT_PARTITION luks-temp.key
@@ -106,7 +106,7 @@ function format_disk() {
     cryptsetup luksOpen $ROOT_PARTITION linuxroot --key-file=luks-temp.key
 
     OUTPUT="Formatting /..."
-    echo -e $(printColor "$OUTPUT" GREEN)
+    printColor "$OUTPUT" GREEN
     #creates ext4 Filesystem
     mkfs.ext4 "/dev/mapper/linuxroot"
 }
@@ -115,12 +115,12 @@ function format_disk() {
 function mount_filesystem() {
 
     OUTPUT="Mounting ${1} to /mnt/efi..."
-    echo -e $(printColor "$OUTPUT" GREEN)
+    printColor "$OUTPUT" GREEN
     #EFI
     mount --mkdir $1 /mnt/efi
 
     OUTPUT="Mounting /dev/mapper/linuxroot to /mnt..."
-    echo -e $(printColor "$OUTPUT" GREEN)
+    printColor "$OUTPUT" GREEN
     #ROOT
     mount /dev/mapper/linuxroot /mnt
 }
@@ -134,14 +134,14 @@ source ./util.sh
 
 INSTALL_DISK=$(ask_user_for_disk)
 OUTPUT="${INSTALL_DISK}"
-echo -e $(printColor "$OUTPUT" GREEN)
+printColor "$OUTPUT" GREEN
 
 if ! [ -n "$INSTALL_DISK" ] && [ " " != "$INSTALL_DISK" ] 2>/dev/null; then
         OUTPUT="\
         ╔═══════════════════════════════════╗\n\
         ║ Error with parameters, exiting... ║\n\
         ╚═══════════════════════════════════╝\n"
-        echo -e $(printColor "$OUTPUT" RED)
+        printColor "$OUTPUT" RED
         sleep 5
         exit 1
 fi
