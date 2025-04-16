@@ -158,7 +158,7 @@ function setup_uki() {
 
 
 OUTPUT='╔═══════════════════════════════════════════════════════════════════════════════════╗
-║ Rebooting, please set Secure-Boot in BIOS to setup mode! And tsurn on Secure-Boot ║
+║ Rebooting, please set Secure-Boot in BIOS to setup mode! And turn on Secure-Boot ║
 ╚═══════════════════════════════════════════════════════════════════════════════════╝'
     printColor "$OUTPUT" "CYAN"
 

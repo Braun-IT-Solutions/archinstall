@@ -45,7 +45,7 @@ function recoveryKey() {
 
 
   #replaces tmp.txt with "2" flag to make sure the script runs again after reboot from the correct point
-  chown $USER:$USER /mnt/home/$USER/tmp.txt
+  chown $USER:$USER /home/$USER/tmp.txt
   echo "2" > /home/$USER/tmp.txt
 
   #Reboot to setup TPM2 correctly
@@ -74,7 +74,7 @@ function rollOutTPM2(){
   OUTPUT="Delete Initial Password..."
   printColor "$OUTPUT" GREEN
   #Deletes temporary password
-  systemd-cryptenroll /dev/gpt-auto-root-luks --wipe-slot=password
+  sudo systemd-cryptenroll /dev/gpt-auto-root-luks --wipe-slot=password
   rm -rf /home/$USER/luks-temp.key
 
 
