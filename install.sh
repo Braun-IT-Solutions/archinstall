@@ -16,13 +16,6 @@ function print_logo() {
 #Function to ask for user detail. User details are gonna be used to automatically set Login-name and Hostname
 function ask_user_for_details() {
 
-
-    OUTPUT='╔═══════════════════════════════╗
-║ Please enter some basic info: ║
-╚═══════════════════════════════╝'
-    printColor "$OUTPUT" "CYAN"
-
-
     OUTPUT="Your first name (all lowercase):"
     printColor "$OUTPUT" "CYAN"
     read -p "" FIRST_NAME

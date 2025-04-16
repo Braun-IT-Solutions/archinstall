@@ -145,14 +145,15 @@ function setup_uki() {
     OUTPUT="Setting up temp files..."
     printColor "$OUTPUT" GREEN
 
-    cp /mnt/home/$USER/.bashrc /mnt/home/$USER/.bashrcBACKUP
-    rm -rf /mnt/home/$USER/.bashrc
+    #$1 = $LOGIN_NAME
+    cp /mnt/home/$1/.bashrc /mnt/home/$1/.bashrcBACKUP
+    rm -rf /mnt/home/$1/.bashrc
 
-    cat secureBoot.sh > /mnt/home/$USER/.bashrc
-    cat util.sh > /mnt/home/$USER/util.sh
-    echo "1" > /mnt/home/$USER/tmp.txt
+    cat secureBoot.sh > /mnt/home/$1/.bashrc
+    cat util.sh > /mnt/home/$1/util.sh
+    echo "1" > /mnt/home/$1/tmp.txt
 
-    cp luks-temp.key /mnt/home/$USER/luks-temp.key
+    cp luks-temp.key /mnt/home/$1/luks-temp.key
     chmod go-r luks-temp.key
 
 
@@ -183,5 +184,5 @@ install_linux
 configure_basics "$HOSTNAME"
 create_user "$LOGIN_NAME"
 configure_sudo
-setup_uki
+setup_uki "$LOGIN_NAME"
 

@@ -30,9 +30,9 @@ function ask_user_for_disk() {
         DISKS=($(disks_with_name_and_size))
 
         OUTPUT="Please select the drive to install Linux to"
-        printColor "$OUTPUT" "RED"
+        printColor "$OUTPUT" "CYAN"
         OUTPUT="The Drive is gonna be formatted and existing partitions are wiped"
-        printColor "$OUTPUT" "RED"
+        printColor "$OUTPUT" "CYAN"
 
         for i in "${!DISKS[@]}"; do
             LINE=${DISKS[$i]}
