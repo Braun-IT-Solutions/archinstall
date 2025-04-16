@@ -43,7 +43,7 @@ function ask_user_for_disk() {
         done
 
         OUTPUT="Select a partition:"
-        printColor "$OUTPUT" GREEN
+        printColor "$OUTPUT" CYAN
         read -p "" SELECTED_INDEX
 
         SELECTED_DISK=${DISKS["$SELECTED_INDEX"]}
