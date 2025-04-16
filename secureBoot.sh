@@ -84,16 +84,16 @@ function rollOutTPM2(){
   #deletes util script
   rm -rf /home/$USER/.bashrc
   cp /home/$USER/.bashrcBACKUP /home/$USER/.bashrc
-  rm -rf /home/$USER/.bashrcBACKUP /home/$USER/tmp.txt /home/$USER/util.sh
+  sudo rm -rf /home/$USER/.bashrcBACKUP /home/$USER/tmp.txt /home/$USER/util.sh
 
 
   OUTPUT="Rebooting to finalize TPM2 rollout..."
   printColor "$OUTPUT" RED
 
   OUTPUT="Press any key to reboot and continue..."
-  printColor "$OUTPUT" GREEN
+  printColor "$OUTPUT" CYAN
   read -p "" IGNORE
-  sudo systenctl reboot
+  sudo systemctl reboot
 }
 
 #Entry point for Script, toggles depending on tmp.txt
