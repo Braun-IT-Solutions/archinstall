@@ -1,6 +1,15 @@
 #!/usr/bin/bash
 #This Script runs after user login after initial setup in "/home/USER/.bashrc"
 
+
+#Checks all needed file permissions 
+function checkFilePermissions(){
+  FILES=("util.sh" "luks-temp.key" ".bashrc" ".bachrcBACKUP" "tmp.txt")
+  IFS=$'\n' 
+  read -r -d '' -a PERMISSIONS < <(stat -c "%A %U %G %n" "${FILES[@]}")
+  printf '%s\n' "${PERMISSIONS[@]}"
+}
+
 #Checks if BIOS secureboot is in setup mode
 function checkSetupMode(){
   sbctl status
@@ -98,6 +107,10 @@ function rollOutTPM2(){
   printColor "$OUTPUT" CYAN
   read -p "" NEW_PASSWORD
   echo $NEW_PASSWORD | sudo passwd $USER
+
+
+  #sets sudo to use password again
+  #sed -i -e "s/^fallback_config=/#fallback_config=/g" /mnt/etc/mkinitcpio.d/linux.preset
 
 
 
