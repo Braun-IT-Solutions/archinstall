@@ -79,6 +79,7 @@ function create_user() {
     
     OUTPUT="Your initial password is \033[96m$DEFAULT_PASSWORD"
     printColor "$OUTPUT" CYAN
+    echo $DEFAULT_PASSWORD
     sleep 5
 }
 
@@ -156,9 +157,23 @@ function setup_uki() {
     cp luks-temp.key /mnt/home/$1/luks-temp.key
     chmod 400 /mnt/home/$1/luks-temp.key
 
+OUTPUT='╔════════════════════════════════════════════════════════════════════════════════════════════════╗
+║ This is your Login-name, Hostname, your temporary password and hard-drive decryption password. ║
+║                           PLEASE WRITE THEM DOWN OR REMEMBER THEM!                             ║
+╚════════════════════════════════════════════════════════════════════════════════════════════════╝\n'
+    printColor "$OUTPUT" "YELLOW"
+    #$1 = LOGIN_NAME
+    #$2 = HOST_NAME
+    #$3 = TEMPORARY PASSWORD
+    LUKS_KEY=$(cat /mnt/home/$1/luks-temp.key)
+
+OUTPUT="Login-name: $1\nHostname: $2\nTemporary user password: $3\nTemporary Hard-drive decryption password: $LUKS_KEY\n\n"
+
+    printColor "$OUTPUT" "YELLOW"
+
 
 OUTPUT='╔═══════════════════════════════════════════════════════════════════════════════════╗
-║ Rebooting, please set Secure-Boot in BIOS to setup mode! And turn on Secure-Boot ║
+║ Rebooting, please set Secure-Boot in BIOS to setup mode and turn on Secure-Boot!  ║
 ╚═══════════════════════════════════════════════════════════════════════════════════╝'
     printColor "$OUTPUT" "CYAN"
 
@@ -182,7 +197,7 @@ HOSTNAME=$2
 
 install_linux
 configure_basics "$HOSTNAME"
-create_user "$LOGIN_NAME"
+PASSWORD=$(create_user "$LOGIN_NAME")
 configure_sudo
-setup_uki "$LOGIN_NAME"
+setup_uki "$LOGIN_NAME" "$HOSTNAME" "$PASSWORD"
 
