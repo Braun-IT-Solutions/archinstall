@@ -93,7 +93,11 @@ function rollOutTPM2(){
   printColor "$OUTPUT" GREEN
 
 
-
+  #Sets new user password
+  OUTPUT="Please enter your new password: "
+  printColor "$OUTPUT" CYAN
+  read -p "" NEW_PASSWORD
+  echo $NEW_PASSWORD | sudo passwd $USER
 
 
 
