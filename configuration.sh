@@ -1,21 +1,28 @@
 #!/bin/bash
 
-DEFAULT_PASSWORD="root"
+#Catches errors and stops the script early
+set -eo pipefail
 
-#Checks for both parameters
-#1: Login-name
-#2: Hostname
-check_parameters() {
-    if ! [ -n "$1" ] && [ " " != "$1" ] && ! [ -n "$2" ] && [ " " != "$2" ] 2>/dev/null; then
-        OUTPUT="\
-        ╔═══════════════════════════════════╗\n\
-        ║ Error with parameters, exiting... ║\n\
-        ╚═══════════════════════════════════╝\n"
-        printColor "$OUTPUT" RED
-        sleep 5
-        exit 1
-    fi
-}
+SCRIPT_PATH=$(dirname "$0")
+cd $SCRIPT_PATH
+source ./util.sh
+
+#check required params
+if ! [ -n "$1" ] && [ " " != "$1" ] && ! [ -n "$2" ] && [ " " != "$2" ] && ! [ -n "$3" ] && [ " " != "$3" ] 2>/dev/null; then
+    OUTPUT="╔═══════════════════════════════════╗\n\
+║ Error with parameters, exiting... ║\n\
+║ \$1 username                      ║\n\
+║ \$2 hostname                      ║\n\
+║ \$3 password                      ║\n\
+╚═══════════════════════════════════╝\n"
+    printColor "$OUTPUT" RED
+    sleep 5
+    exit 1
+fi
+
+LOGIN_NAME="$1"
+HOSTNAME="$2"
+DEFAULT_PASSWORD="$3"
 
 #Installs basic packages and system files
 function install_linux() {
@@ -31,7 +38,6 @@ function install_linux() {
     pacstrap -K /mnt $PACKAGES
 }
 
-# $1 hostname
 #Generates locales, german keyboard and hostname
 function configure_basics() {
 
@@ -55,19 +61,18 @@ function configure_basics() {
 
     printColor "Setting hostname..." GREEN
     #sets hostname
-    echo $1 >/mnt/etc/hostname
+    echo $HOSTNAME >/mnt/etc/hostname
 
     printColor "Generating locales..." GREEN
     #Generates locales
     arch-chroot /mnt locale-gen
 }
 
-# $1 username
 #Setup for user with "$LOGIN_NAME"
 function create_user() {
     printColor "Creating user..." GREEN
-    arch-chroot /mnt useradd -G wheel -m $1
-    echo $DEFAULT_PASSWORD | arch-chroot /mnt passwd $1 --stdin
+    arch-chroot /mnt useradd -G wheel -m $LOGIN_NAME
+    echo $DEFAULT_PASSWORD | arch-chroot /mnt passwd $LOGIN_NAME --stdin
 }
 
 #Configures sudo to not need password
@@ -82,7 +87,6 @@ function enable_services() {
     systemctl --root /mnt enable systemd-resolved systemd-timesyncd dhcpcd
 }
 
-# $1 username
 #Sets unified kernel images and generates them
 function setup_uki() {
     printColor "Setting up UKI..." GREEN
@@ -122,60 +126,25 @@ function setup_uki() {
     enable_services
 
     sync
+}
 
+function setupUserEnv() {
     printColor "Setting up temp files..." GREEN
 
-    #$1 = $LOGIN_NAME
-    cp /mnt/home/$1/.bashrc /mnt/home/$1/.bashrcBACKUP
-    rm -rf /mnt/home/$1/.bashrc
+    cp /mnt/home/$LOGIN_NAME/.bashrc /mnt/home/$LOGIN_NAME/.bashrcBACKUP
+    rm -rf /mnt/home/$LOGIN_NAME/.bashrc
 
-    cat secure-boot.sh >/mnt/home/$1/.bashrc
-    cat util.sh >/mnt/home/$1/util.sh
-    echo "1" >/mnt/home/$1/tmp.txt
+    cat secure-boot.sh >/mnt/home/$LOGIN_NAME/.bashrc
+    cat util.sh >/mnt/home/$LOGIN_NAME/util.sh
+    echo "1" >/mnt/home/$LOGIN_NAME/tmp.txt
 
-    cp luks-temp.key /mnt/home/$1/luks-temp.key
-    chmod 400 /mnt/home/$1/luks-temp.key
+    cp luks-temp.key /mnt/home/$LOGIN_NAME/luks-temp.key
+    chmod 400 /mnt/home/$LOGIN_NAME/luks-temp.key
 }
-
-# $1 = LOGIN_NAME
-# $2 = HOST_NAME
-# $3 = TEMPORARY PASSWORD
-function doReboot() {
-    OUTPUT='╔════════════════════════════════════════════════════════════════════════════════════════════════╗
-║ This is your Login-name, Hostname, your temporary password and hard-drive decryption password. ║
-║                           PLEASE WRITE THEM DOWN OR REMEMBER THEM!                             ║
-╚════════════════════════════════════════════════════════════════════════════════════════════════╝\n'
-    printColor "$OUTPUT" "YELLOW"
-
-    LUKS_KEY=$(cat /mnt/home/$1/luks-temp.key)
-
-    printColor "Login-name: $1\nHostname: $2\nTemporary user password: $3\nTemporary Hard-drive decryption password: $LUKS_KEY\n\n" "YELLOW"
-
-    OUTPUT='╔═══════════════════════════════════════════════════════════════════════════════════╗
-║ Rebooting, please set Secure-Boot in BIOS to setup mode and turn on Secure-Boot!  ║
-╚═══════════════════════════════════════════════════════════════════════════════════╝'
-    printColor "$OUTPUT" "CYAN"
-
-    printColor "Press any key to reboot and continue..." CYAN
-    read -r IGNORE
-    systemctl reboot --firmware-setup
-}
-
-#Catches errors and stops the script early
-set -eo pipefail
-
-SCRIPT_PATH=$(dirname "$0")
-cd $SCRIPT_PATH
-source ./util.sh
-
-check_parameters $1 $2
-
-LOGIN_NAME=$1
-HOSTNAME=$2
 
 install_linux
-configure_basics "$HOSTNAME"
-create_user "$LOGIN_NAME"
+configure_basics
+create_user
 configure_sudo
-setup_uki "$LOGIN_NAME"
-doReboot "$LOGIN_NAME" "$HOSTNAME" "$PASSWORD"
+setup_uki
+setupUserEnv

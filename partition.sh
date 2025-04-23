@@ -3,10 +3,9 @@
 #2: Hostname
 check_parameters() {
     if ! [ -n "$1" ] && [ " " != "$1" ] && ! [ -n "$2" ] && [ " " != "$2" ] 2>/dev/null; then
-        OUTPUT="\
-        ╔═══════════════════════════════════╗\n\
-        ║ Error with parameters, exiting... ║\n\
-        ╚═══════════════════════════════════╝\n"
+        OUTPUT="╔═══════════════════════════════════╗\n\
+║ Error with parameters, exiting... ║\n\
+╚═══════════════════════════════════╝\n"
         printColor "$OUTPUT" RED
         sleep 5
         exit 1
@@ -137,10 +136,9 @@ OUTPUT="${INSTALL_DISK}"
 printColor "$OUTPUT" GREEN
 
 if ! [ -n "$INSTALL_DISK" ] && [ " " != "$INSTALL_DISK" ] 2>/dev/null; then
-    OUTPUT="\
-        ╔═══════════════════════════════════╗\n\
-        ║ Error with parameters, exiting... ║\n\
-        ╚═══════════════════════════════════╝\n"
+    OUTPUT="╔═══════════════════════════════════╗\n\
+║ Error with parameters, exiting... ║\n\
+╚═══════════════════════════════════╝\n"
     printColor "$OUTPUT" RED
     sleep 5
     exit 1

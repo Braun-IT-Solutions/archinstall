@@ -6,6 +6,7 @@ set -euo pipefail
 
 SCRIPT_PATH=$(dirname "$0")
 cd "$SCRIPT_PATH"
+
 source ./util.sh
 
 TEMP_TXT="$HOME/tmp.txt"
@@ -13,6 +14,7 @@ RECOVERY_KEY_TXT="$HOME/recovery_key.txt"
 LUKS_TEMP_KEY="$HOME/luks-temp.key"
 LUKS_DEVICE="/dev/gpt-auto-root-luks"
 
+# $1 message
 #write info message and ask for input to reboot
 function doReboot() {
   printColor "$1" CYAN
@@ -21,6 +23,7 @@ function doReboot() {
   reboot
 }
 
+# $1 new flag
 function setFlagTo() {
   #replaces tmp.txt with flag value to make sure the script runs again after reboot from the correct point
   echo "$1" >"$TEMP_TXT"
@@ -220,8 +223,11 @@ elif [ "$FLAG" -eq 2 ] 2>/dev/null; then
   setNewUserPassword
   sudoRequirePW
   cleanUp
-  printColor "Secure the luks recovery key in ($RECOVERY_KEY_TXT)" YELLOW
-  printColor "Make sure to store it safely and securely!" YELLOW
+  OUTPUT="╔═════════════════════════════════════════════════════╗\n\
+║ Secure the luks recovery key in ($RECOVERY_KEY_TXT) ║\n\
+║ Make sure to store it safely and securely!          ║\n\
+╚═════════════════════════════════════════════════════╝\n"
+  printColor "$OUTPUT" YELLOW
   doReboot "Script is done after reboot"
 else
   printColor "Unexpected FLAG value ($FLAG) in $TEMP_TXT" RED
