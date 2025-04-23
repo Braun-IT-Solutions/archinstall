@@ -112,7 +112,7 @@ function setNewUserPassword() {
     echo
 
     if [ "$NEW_PASSWORD" = "$REPEAT_PASSWORD" ]; then
-      echo -e "$NEW_PASSWORD\n$NEW_PASSWORD" | passwd
+      echo $USER:$NEW_PASSWORD | chpasswd
       printColor "Set user password" GREEN
       break
     else
