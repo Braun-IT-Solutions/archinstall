@@ -112,7 +112,7 @@ function setNewUserPassword() {
     echo
 
     if [ "$NEW_PASSWORD" = "$REPEAT_PASSWORD" ]; then
-      echo "$NEW_PASSWORD" | passwd $USER --stdin
+      echo -e "$NEW_PASSWORD\n$NEW_PASSWORD" | passwd
       printColor "Set user password" GREEN
       break
     else
@@ -121,7 +121,7 @@ function setNewUserPassword() {
   done
 }
 
-set +eo
+set -eo pipefail
 
 SCRIPT_PATH=$(dirname "$0")
 cd $SCRIPT_PATH
