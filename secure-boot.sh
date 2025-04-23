@@ -1,12 +1,11 @@
 #!/usr/bin/bash
 #This Script runs after user login after initial setup in "/home/USER/.bashrc"
 
-# Exit on error, undefined variable, and propagate pipe failures
-set -euo pipefail
+# Catches errors and stops the script early
+set -eo pipefail
 
 SCRIPT_PATH=$(dirname "$0")
 cd "$SCRIPT_PATH"
-
 source ./util.sh
 
 TEMP_TXT="$HOME/tmp.txt"
@@ -200,10 +199,6 @@ function setNewUserPassword() {
 
 # Main script execution
 checkSetupMode
-
-# Ensure user file permissions
-sudo chown "$USER:$USER" "$HOME"/* 2>/dev/null || true  # Non-fatal if empty
-sudo chown "$USER:$USER" "$HOME"/.* 2>/dev/null || true # Non-fatal if no dotfiles
 
 # Check if temp file exists
 if [[ ! -f "$TEMP_TXT" ]]; then

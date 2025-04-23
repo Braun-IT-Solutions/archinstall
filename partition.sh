@@ -1,11 +1,10 @@
 #!/bin/bash
 
-#Catches errors and stops the script early
+# Catches errors and stops the script early
 set -eo pipefail
 
 SCRIPT_PATH=$(dirname "$0")
-cd $SCRIPT_PATH
-
+cd "$SCRIPT_PATH"
 source ./util.sh
 
 check_partitions() {

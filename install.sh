@@ -1,7 +1,11 @@
 #!/usr/bin/bash
 
-#Catches errors and stops the script early
+# Catches errors and stops the script early
 set -eo pipefail
+
+SCRIPT_PATH=$(dirname "$0")
+cd "$SCRIPT_PATH"
+source ./util.sh
 
 echo -e '\n\n $$$$$$$\  $$$$$$\ $$$$$$$$\  $$$$$$\' "\n" \
     '$$  __$$\ \_$$  _|\__$$  __|$$  __$$\' "\n" \
@@ -12,11 +16,6 @@ echo -e '\n\n $$$$$$$\  $$$$$$\ $$$$$$$$\  $$$$$$\' "\n" \
     '$$$$$$$  |$$$$$$\    $$ |   \$$$$$$  |' "\n" \
     '\_______/ \______|   \__|    \______/'
 echo -e "\nWelcome to BITS archinstall\n"
-
-SCRIPT_PATH=$(dirname "$0")
-cd $SCRIPT_PATH
-
-source ./util.sh
 
 DEFAULT_PASSWORD="root"
 #Setup for Login-name and Hostname for use in ./configuration
@@ -35,7 +34,8 @@ printColor "Login name: $LOGIN_NAME" GREEN
 INITIALS="${FIRST_NAME:0:1}${LAST_NAME:0:1}"
 HOSTNAME="AXD-${INITIALS^^}${LUCKY_NUMBER}"
 printColor "Hostname: $HOSTNAME" GREEN
-sleep 1
+printColor "Continue with enter..." CYAN
+read -r IGNORE
 
 # run setup scripts
 ./partition.sh
