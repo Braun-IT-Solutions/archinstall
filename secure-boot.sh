@@ -1,8 +1,17 @@
 #!/usr/bin/bash
 #This Script runs after user login after initial setup in "/home/USER/.bashrc"
 
-TEMP_TXT=$HOME/tmp.txt
-RECOVERY_KEY_TXT=$HOME/recovery_key.txt
+# Exit on error, undefined variable, and propagate pipe failures
+set -euo pipefail
+
+SCRIPT_PATH=$(dirname "$0")
+cd "$SCRIPT_PATH"
+source ./util.sh
+
+TEMP_TXT="$HOME/tmp.txt"
+RECOVERY_KEY_TXT="$HOME/recovery_key.txt"
+LUKS_TEMP_KEY="$HOME/luks-temp.key"
+LUKS_DEVICE="/dev/gpt-auto-root-luks"
 
 #write info message and ask for input to reboot
 function doReboot() {
@@ -13,44 +22,60 @@ function doReboot() {
 }
 
 function setFlagTo() {
-  #replaces tmp.txt with "2" flag to make sure the script runs again after reboot from the correct point
-  echo "$1" >$TEMP_TXT
+  #replaces tmp.txt with flag value to make sure the script runs again after reboot from the correct point
+  echo "$1" >"$TEMP_TXT"
 }
 
 #Checks if BIOS secureboot is in setup mode
 function checkSetupMode() {
-  sbctl status
+  sbctl status || {
+    printColor "Failed to check Secure Boot status" RED
+    return 1
+  }
 }
 
 #Creates keys, signs them and rebuilds initramfs image based on kernel packages(mkinitcpio -P)
 function createKeysAndSign() {
   printColor "Creating keys..." GREEN
   #Creates a set of signing keys used to sign EFI binaries
-  sudo sbctl create-keys
+  sudo sbctl create-keys || {
+    printColor "Failed to create Secure Boot keys" RED
+    return 1
+  }
 
   printColor "Created keys..." GREEN
   printColor "Enrolling keys..." GREEN
   #Enrolls the created key into the EFI variables.
   #"-m: Enroll UEFI vendor certificates from Microsoft into the signature database."
-  #Some Services/Hrdware needs those
-  sudo sbctl enroll-keys -m
+  #Some Services/Hardware needs those
+  sudo sbctl enroll-keys -m || {
+    printColor "Failed to enroll Secure Boot keys" RED
+    return 1
+  }
 
   printColor "Enrolled keys..." GREEN
 
   printColor "Signing Keys..." GREEN
-  #Signs an EFI binary with the created key
+  #Signs EFI binaries with the created keys
   #-o: output filename,
   #-s: saves key to the database
-  sudo sbctl sign -s -o /usr/lib/systemd/boot/efi/systemd-bootx64.efi.signed /usr/lib/systemd/boot/efi/systemd-bootx64.efi
+  sudo sbctl sign -s -o /usr/lib/systemd/boot/efi/systemd-bootx64.efi.signed /usr/lib/systemd/boot/efi/systemd-bootx64.efi || {
+    printColor "Failed to sign systemd-bootx64.efi" RED
+    return 1
+  }
+
   sudo sbctl sign -s /efi/EFI/BOOT/BOOTX64.efi
   sudo sbctl sign -s /efi/EFI/Linux/arch-linux.efi
   sudo sbctl sign -s /efi/EFI/Linux/arch-linux-fallback.efi
 
-  printColor "Siged Keys..." GREEN
+  printColor "Signed Keys..." GREEN
   printColor "Generating new UKI's..." GREEN
   #Generates initramfs image based on kernel packages
   #"-P: re-generates all initramfs images"
-  sudo mkinitcpio -P
+  sudo mkinitcpio -P || {
+    printColor "Failed to generate initramfs images" RED
+    return 1
+  }
   printColor "Generated UKI's..." GREEN
 }
 
@@ -59,8 +84,13 @@ function setRecoveryKey() {
   printColor "Generate Recovery Key..." GREEN
 
   #Generates recovery key into user home directory
-  sudo systemd-cryptenroll /dev/gpt-auto-root-luks --unlock-key-file=luks-temp.key --recovery-key >$RECOVERY_KEY_TXT
-  sudo chown $USER:$USER $RECOVERY_KEY_TXT
+  if ! sudo systemd-cryptenroll "$LUKS_DEVICE" --unlock-key-file="$LUKS_TEMP_KEY" --recovery-key >"$RECOVERY_KEY_TXT"; then
+    printColor "Failed to generate recovery key" RED
+    return 1
+  fi
+
+  sudo chown "$USER:$USER" "$RECOVERY_KEY_TXT"
+  chmod 600 "$RECOVERY_KEY_TXT"
 
   printColor "Recovery Key generated..." GREEN
 }
@@ -71,34 +101,71 @@ function cleanUp() {
   #restores og .bashrc and,
   #deletes tmp.txt for script toggle
   #deletes util script
-  rm -rf $HOME/.bashrc
-  cp $HOME/.bashrcBACKUP $HOME/.bashrc
-  rm -rf $HOME/.bashrcBACKUP $HOME/tmp.txt $HOME/util.sh
+
+  # Securely remove sensitive file
+  shred -u "$LUKS_TEMP_KEY" 2>/dev/null || rm -f "$LUKS_TEMP_KEY"
+
+  # Restore original .bashrc if backup exists
+  rm -f "$HOME/.bashrc"
+  cp "$HOME/.bashrcBACKUP" "$HOME/.bashrc"
+  rm -f "$HOME/.bashrcBACKUP"
+
+  # Remove other temporary files
+  rm -f "$HOME/tmp.txt" "$HOME/util.sh"
 
   printColor "Deleted temporary files..." GREEN
 }
 
 function rollingTPM2() {
-  printColor "Rolling TPM2.." GREEN
+  printColor "Rolling TPM2..." GREEN
   #Enables autodecrypt,
   #Registers pcrs:
   # 0: Core System Firmware executable code,
   # 7: Secure Boot State,
   #needs the temporary key from "./luks-temp.key"
-  $(sudo systemd-cryptenroll --tpm2-device=auto --wipe-slot=tpm2 --tpm2-pcrs=0+7 --unlock-key-file=luks-temp.key /dev/gpt-auto-root-luks)
+  $(sudo systemd-cryptenroll --tpm2-device=auto --wipe-slot=tpm2 --tpm2-pcrs=0+7 --unlock-key-file="$LUKS_TEMP_KEY" "$LUKS_DEVICE")
 
-  printColor "Rolled TPM2.." GREEN
+  printColor "Rolled TPM2..." GREEN
   printColor "Deleting initial luks password..." GREEN
+
   #Deletes temporary password
-  sudo systemd-cryptenroll /dev/gpt-auto-root-luks --wipe-slot=password
-  rm -rf $HOME/luks-temp.key
+  if ! sudo systemd-cryptenroll "$LUKS_DEVICE" --wipe-slot=password; then
+    printColor "Failed to wipe temporary LUKS password" RED
+    return 1
+  fi
 
   printColor "Deleted initial luks password..." GREEN
 }
 
 function sudoRequirePW() {
-  sudo sed -i -e '/^# %wheel ALL=(ALL:ALL) ALL/s/^# //' /etc/sudoers
-  sudo sed -i -e '/^%wheel ALL=(ALL:ALL) NOPASSWD: ALL/s/^/# /' /etc/sudoers
+  printColor "Configuring sudo to require password..." GREEN
+  # Create a temporary file for safer sudoers editing
+  SUDOERS_TMP=$(mktemp)
+  sudo cp /etc/sudoers "$SUDOERS_TMP"
+
+  # Remove the comment marker from password-requiring line
+  sudo sed -i -e '/^[[:space:]]*#[[:space:]]*%wheel[[:space:]]*ALL=(ALL:ALL)[[:space:]]*ALL/s/^[[:space:]]*#[[:space:]]*//' "$SUDOERS_TMP"
+  # Comment out the NOPASSWD line
+  sudo sed -i -e '/^[[:space:]]*%wheel[[:space:]]*ALL=(ALL:ALL)[[:space:]]*NOPASSWD:[[:space:]]*ALL/s/^/# /' "$SUDOERS_TMP"
+
+  # Verify the changes
+  if sudo grep -qE '^[[:space:]]*%wheel[[:space:]]*ALL=\(ALL:ALL\)[[:space:]]*ALL' "$SUDOERS_TMP" &&
+    sudo grep -qE '^[[:space:]]*#[[:space:]]*%wheel[[:space:]]*ALL=\(ALL:ALL\)[[:space:]]*NOPASSWD:[[:space:]]*ALL' "$SUDOERS_TMP"; then
+    printColor "Successfully configured sudo to require password" GREEN
+  else
+    printColor "Warning: Changes applied but verification failed. Please check /etc/sudoers manually." YELLOW
+  fi
+
+  # Check syntax before applying changes
+  if sudo visudo -c -f "$SUDOERS_TMP" >/dev/null 2>&1; then
+    # Apply the changes if syntax is correct
+    sudo cp "$SUDOERS_TMP" /etc/sudoers
+  else
+    printColor "Error: Invalid sudoers syntax detected. No changes were made." RED
+  fi
+
+  # Clean up temporary file
+  sudo rm -f "$SUDOERS_TMP"
 }
 
 function setNewUserPassword() {
@@ -112,26 +179,30 @@ function setNewUserPassword() {
     echo
 
     if [ "$NEW_PASSWORD" = "$REPEAT_PASSWORD" ]; then
-      echo $USER:$NEW_PASSWORD | chpasswd
+      # Use here-string to avoid exposing password in process list
+      printf "%s:%s" "$USER" "$NEW_PASSWORD" | sudo chpasswd
       printColor "Set user password" GREEN
       break
     else
       printColor "Passwords do not match. Please try again." RED
+      unset NEW_PASSWORD REPEAT_PASSWORD # Clear variables containing passwords
     fi
   done
 }
 
-set -eo pipefail
+# Main script execution
 
-SCRIPT_PATH=$(dirname "$0")
-cd $SCRIPT_PATH
-source ./util.sh
+# Ensure user file permissions
+sudo chown "$USER:$USER" "$HOME"/* 2>/dev/null || true  # Non-fatal if empty
+sudo chown "$USER:$USER" "$HOME"/.* 2>/dev/null || true # Non-fatal if no dotfiles
 
-#ensue user file permissions
-sudo chown $USER:$USER $HOME/*
-sudo chown $USER:$USER $HOME/.*
+# Check if temp file exists
+if [[ ! -f "$TEMP_TXT" ]]; then
+  printColor "Error: Missing $TEMP_TXT file!" RED
+  exit 1
+fi
 
-#read the flag for the next step to run
+# Read the flag for the next step to run
 FLAG=$(cat "$TEMP_TXT")
 if [ "$FLAG" -eq 1 ] 2>/dev/null; then
   createKeysAndSign
@@ -143,8 +214,11 @@ elif [ "$FLAG" -eq 2 ] 2>/dev/null; then
   setNewUserPassword
   sudoRequirePW
   cleanUp
-  printColor "Secure the luks recovery key in ($RECOVERY_KEY_TXT)"
+  printColor "Secure the luks recovery key in ($RECOVERY_KEY_TXT)" YELLOW
+  printColor "Make sure to store it safely and securely!" YELLOW
   doReboot "Script is done after reboot"
 else
-  printColor "Unexpected FLAG in tmp.txt" RED
+  printColor "Unexpected FLAG value ($FLAG) in $TEMP_TXT" RED
+  printColor "Expected values are 1 or 2. Please restore a correct value to continue." RED
+  exit 1
 fi
