@@ -28,10 +28,15 @@ function setFlagTo() {
 
 #Checks if BIOS secureboot is in setup mode
 function checkSetupMode() {
-  sbctl status || {
+  if sbctl status | grep -q "Setup Mode: Enabled"; then
+    return 0
+  elif sbctl status | grep -q "Setup Mode"; then
+    printColor "Secureboot is not in setup mode" RED
+    exit 1
+  else
     printColor "Failed to check Secure Boot status" RED
-    return 1
-  }
+    exit 1
+  fi
 }
 
 #Creates keys, signs them and rebuilds initramfs image based on kernel packages(mkinitcpio -P)
@@ -191,6 +196,7 @@ function setNewUserPassword() {
 }
 
 # Main script execution
+checkSetupMode
 
 # Ensure user file permissions
 sudo chown "$USER:$USER" "$HOME"/* 2>/dev/null || true  # Non-fatal if empty
