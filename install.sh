@@ -11,22 +11,22 @@ function print_logo() {
         '$$$$$$$  |$$$$$$\    $$ |   \$$$$$$  |' "\n" \
         '\_______/ \______|   \__|    \______/'
     echo -e "\nWelcome to BITS archinstall\n"
-} 
+}
 
 #Function to ask for user detail. User details are gonna be used to automatically set Login-name and Hostname
 function ask_user_for_details() {
 
     OUTPUT="Your first name (all lowercase):"
     printColor "$OUTPUT" "CYAN"
-    read -p "" FIRST_NAME
+    read -r FIRST_NAME
 
     OUTPUT="Your last name (all lowercase):"
     printColor "$OUTPUT" "CYAN"
-    read -p "" LAST_NAME
+    read -r LAST_NAME
 
     OUTPUT="Your lucky number (just choose one):"
     printColor "$OUTPUT" "CYAN"
-    read -p "" LUCKY_NUMBER
+    read -r LUCKY_NUMBER
 
     echo "$FIRST_NAME $LAST_NAME $LUCKY_NUMBER"
 }
@@ -60,5 +60,3 @@ sleep 1
 ./partition.sh
 
 ./configuration.sh $LOGIN_NAME $HOSTNAME
-
-

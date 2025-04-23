@@ -1,7 +1,7 @@
 #Checks for both parameters
 #1: Login-name
 #2: Hostname
-check_parameters(){
+check_parameters() {
     if ! [ -n "$1" ] && [ " " != "$1" ] && ! [ -n "$2" ] && [ " " != "$2" ] 2>/dev/null; then
         OUTPUT="\
         ╔═══════════════════════════════════╗\n\
@@ -22,7 +22,7 @@ function disks_with_name_and_size() {
     printf '%s\n' "${AVAILABLE_DISKS[@]}"
 }
 
-#Prints avialable Block devices and makes you choose one for installation. 
+#Prints avialable Block devices and makes you choose one for installation.
 #Returns name of the chosen Block device
 function ask_user_for_disk() {
     while true; do
@@ -38,13 +38,13 @@ function ask_user_for_disk() {
             LINE=${DISKS[$i]}
             IFS=' '
             LINE=(${LINE[@]})
-            echo "    $i - /dev/${LINE[0]}    Size: ${LINE[1]}" > /dev/tty
+            echo "    $i - /dev/${LINE[0]}    Size: ${LINE[1]}" >/dev/tty
             IFS=$'\n'
         done
 
         OUTPUT="Select a partition:"
         printColor "$OUTPUT" CYAN
-        read -p "" SELECTED_INDEX
+        read -r SELECTED_INDEX
 
         SELECTED_DISK=${DISKS["$SELECTED_INDEX"]}
         if [ -v "DISKS[$SELECTED_INDEX]" ] && [ "$SELECTED_INDEX" -eq "$SELECTED_INDEX" ] 2>/dev/null; then
@@ -71,11 +71,11 @@ function partition_disk() {
     OUTPUT="Partitioning disk ${1}..."
     printColor "$OUTPUT" GREEN
     #Creates new Partitions according to scheme
-    sfdisk $1 < partition-scheme.sfdisk
+    sfdisk $1 <partition-scheme.sfdisk
 }
 
 #Returns all existing Partitions from handed device
-function get_partitions() {   
+function get_partitions() {
     PARTITIONS=$(lsblk -r $1 | cut -d' ' -f1)
     IFS=$'\n'
     PARTITIONS=($PARTITIONS)
@@ -137,15 +137,15 @@ OUTPUT="${INSTALL_DISK}"
 printColor "$OUTPUT" GREEN
 
 if ! [ -n "$INSTALL_DISK" ] && [ " " != "$INSTALL_DISK" ] 2>/dev/null; then
-        OUTPUT="\
+    OUTPUT="\
         ╔═══════════════════════════════════╗\n\
         ║ Error with parameters, exiting... ║\n\
         ╚═══════════════════════════════════╝\n"
-        printColor "$OUTPUT" RED
-        sleep 5
-        exit 1
+    printColor "$OUTPUT" RED
+    sleep 5
+    exit 1
 fi
- 
+
 partition_disk $INSTALL_DISK
 
 IFS=$'\n'

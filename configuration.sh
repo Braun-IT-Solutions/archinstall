@@ -1,8 +1,11 @@
+#!/bin/bash
+
+DEFAULT_PASSWORD="root"
 
 #Checks for both parameters
 #1: Login-name
 #2: Hostname
-check_parameters(){
+check_parameters() {
     if ! [ -n "$1" ] && [ " " != "$1" ] && ! [ -n "$2" ] && [ " " != "$2" ] 2>/dev/null; then
         OUTPUT="\
         ╔═══════════════════════════════════╗\n\
@@ -16,13 +19,11 @@ check_parameters(){
 
 #Installs basic packages and system files
 function install_linux() {
-    OUTPUT="Finding fastest mirrors..."
-    printColor "$OUTPUT" GREEN
+    printColor "Finding fastest mirrors..." GREEN
     #Retrieves and filters the latest pacman mirror list
     reflector --country DE --age 24 --protocol http,https --sort rate --save /etc/pacman.d/mirrorlist
 
-    OUTPUT="Installing basic linux..."
-    printColor "$OUTPUT" GREEN
+    printColor "Installing basic linux..." GREEN
     #Packages to install
     PACKAGES="base base-devel linux linux-firmware git nano cryptsetup amd-ucode sbctl sudo htop btop nvtop dhcpcd"
     #Comes preinstalled with arch, designed to create new system installations
@@ -30,91 +31,73 @@ function install_linux() {
     pacstrap -K /mnt $PACKAGES
 }
 
+# $1 hostname
 #Generates locales, german keyboard and hostname
 function configure_basics() {
-    
-    OUTPUT="Settings timezone..."
-    printColor "$OUTPUT" GREEN
+
+    printColor "Settings timezone..." GREEN
     #Sets Timezone Berlin
     arch-chroot /mnt ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime
 
-    OUTPUT="Setting hardware clock..."
-    printColor "$OUTPUT" GREEN
+    printColor "Setting hardware clock..." GREEN
     #Sets the hardwareclock to current system time
     arch-chroot /mnt hwclock --systohc
 
-    OUTPUT="Setting locales..."
-    printColor "$OUTPUT" GREEN
-    
+    printColor "Setting locales..." GREEN
+
     #Setting german locales and EN-USA as fallback
     sed -i -e "/^#"de_DE.UTF-8"/s/^#//" /mnt/etc/locale.gen
     sed -i -e "/^#"en_US.UTF-8"/s/^#//" /mnt/etc/locale.gen
 
-
-    OUTPUT="Setting keymap..."
-    printColor "$OUTPUT" GREEN
+    printColor "Setting keymap..." GREEN
     #Sets german keyboard
-    echo "KEYMAP=de-latin1" > /mnt/etc/vconsole.conf
+    echo "KEYMAP=de-latin1" >/mnt/etc/vconsole.conf
 
-    OUTPUT="Setting hostname..."
-    printColor "$OUTPUT" GREEN
+    printColor "Setting hostname..." GREEN
     #sets hostname
-    echo $1 > /mnt/etc/hostname
+    echo $1 >/mnt/etc/hostname
 
-    OUTPUT="Generating locales..."
-    printColor "$OUTPUT" GREEN
+    printColor "Generating locales..." GREEN
     #Generates locales
     arch-chroot /mnt locale-gen
 }
 
+# $1 username
 #Setup for user with "$LOGIN_NAME"
 function create_user() {
-    #$1 = $LOGIN_NAME
-    DEFAULT_PASSWORD="root"
-
-    OUTPUT="Creating user..."
-    printColor "$OUTPUT" GREEN
+    printColor "Creating user..." GREEN
     arch-chroot /mnt useradd -G wheel -m $1
     echo $DEFAULT_PASSWORD | arch-chroot /mnt passwd $1 --stdin
-    
-    OUTPUT="Your initial password is \033[96m$DEFAULT_PASSWORD"
-    printColor "$OUTPUT" CYAN
-    echo $DEFAULT_PASSWORD
-    sleep 5
 }
 
 #Configures sudo to not need password
 function configure_sudo() {
-    OUTPUT="Configuring sudo..."
-    printColor "$OUTPUT" GREEN
+    printColor "Configuring sudo..." GREEN
     sed -i -e '/^# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/s/^# //' /mnt/etc/sudoers
 }
 
 #Enables systemd & dhcpcd services
 function enable_services() {
-    OUTPUT="Enabling systemd services..."
-    printColor "$OUTPUT" GREEN
+    printColor "Enabling systemd services..." GREEN
     systemctl --root /mnt enable systemd-resolved systemd-timesyncd dhcpcd
 }
 
+# $1 username
 #Sets unified kernel images and generates them
 function setup_uki() {
-    OUTPUT="Setting up UKI..."
-    printColor "$OUTPUT" GREEN
+    printColor "Setting up UKI..." GREEN
 
-    #Sets kernel parameters 
+    #Sets kernel parameters
     #"rw: Mount root device read-write on boot"
-    echo "rw" > /mnt/etc/kernel/cmdline
+    echo "rw" >/mnt/etc/kernel/cmdline
     mkdir -p /mnt/efi/EFI/Linux
 
-    OUTPUT="Setting mkinitcpio hooks..."
-    printColor "$OUTPUT" GREEN
+    printColor "Setting mkinitcpio hooks..." GREEN
     HOOKS="base systemd autodetect modconf kms keyboard sd-vconsole sd-encrypt block filesystems fsck"
     #Setting our hooks for mkinitcpio
     sed -i -e "s/^HOOKS=.*/HOOKS=($HOOKS)/g" /mnt/etc/mkinitcpio.conf
 
-    OUTPUT="Enabling UKI..."
-    printColor "$OUTPUT" GREEN
+    printColor "Enabling UKI..." GREEN
     #Enabling our UKIs
     sed -i -e "s/^default_config=/#default_config=/g" /mnt/etc/mkinitcpio.d/linux.preset
     sed -i -e "s/^default_image=/#default_image=/g" /mnt/etc/mkinitcpio.d/linux.preset
@@ -126,60 +109,55 @@ function setup_uki() {
     sed -i -e "s/^#fallback_uki=/fallback_uki=/g" /mnt/etc/mkinitcpio.d/linux.preset
     sed -i -e "s/^#fallback_options=/fallback_options=/g" /mnt/etc/mkinitcpio.d/linux.preset
 
-    OUTPUT="Generating UKI..."
-    printColor "$OUTPUT" GREEN
-    #Generates initramfs image based on kernel packages 
+    printColor "Generating UKI..." GREEN
+    #Generates initramfs image based on kernel packages
     #"-P: re-generates all initramfs images"
     arch-chroot /mnt mkinitcpio -P
 
-    OUTPUT="Installing bootloader..."
-    printColor "$OUTPUT" GREEN
-    #Install EFI bootloader 
+    printColor "Installing bootloader..." GREEN
+    #Install EFI bootloader
     #"--esp-path=: path to our efi partition"
     arch-chroot /mnt bootctl install --esp-path=/efi
-
 
     enable_services
 
     sync
 
-    OUTPUT="Setting up temp files..."
-    printColor "$OUTPUT" GREEN
+    printColor "Setting up temp files..." GREEN
 
     #$1 = $LOGIN_NAME
     cp /mnt/home/$1/.bashrc /mnt/home/$1/.bashrcBACKUP
     rm -rf /mnt/home/$1/.bashrc
 
-    cat secureBoot.sh > /mnt/home/$1/.bashrc
-    cat util.sh > /mnt/home/$1/util.sh
-    echo "1" > /mnt/home/$1/tmp.txt
+    cat secure-boot.sh >/mnt/home/$1/.bashrc
+    cat util.sh >/mnt/home/$1/util.sh
+    echo "1" >/mnt/home/$1/tmp.txt
 
     cp luks-temp.key /mnt/home/$1/luks-temp.key
     chmod 400 /mnt/home/$1/luks-temp.key
+}
 
-OUTPUT='╔════════════════════════════════════════════════════════════════════════════════════════════════╗
+# $1 = LOGIN_NAME
+# $2 = HOST_NAME
+# $3 = TEMPORARY PASSWORD
+function doReboot() {
+    OUTPUT='╔════════════════════════════════════════════════════════════════════════════════════════════════╗
 ║ This is your Login-name, Hostname, your temporary password and hard-drive decryption password. ║
 ║                           PLEASE WRITE THEM DOWN OR REMEMBER THEM!                             ║
 ╚════════════════════════════════════════════════════════════════════════════════════════════════╝\n'
     printColor "$OUTPUT" "YELLOW"
-    #$1 = LOGIN_NAME
-    #$2 = HOST_NAME
-    #$3 = TEMPORARY PASSWORD
+
     LUKS_KEY=$(cat /mnt/home/$1/luks-temp.key)
 
-OUTPUT="Login-name: $1\nHostname: $2\nTemporary user password: $3\nTemporary Hard-drive decryption password: $LUKS_KEY\n\n"
+    printColor "Login-name: $1\nHostname: $2\nTemporary user password: $3\nTemporary Hard-drive decryption password: $LUKS_KEY\n\n" "YELLOW"
 
-    printColor "$OUTPUT" "YELLOW"
-
-
-OUTPUT='╔═══════════════════════════════════════════════════════════════════════════════════╗
+    OUTPUT='╔═══════════════════════════════════════════════════════════════════════════════════╗
 ║ Rebooting, please set Secure-Boot in BIOS to setup mode and turn on Secure-Boot!  ║
 ╚═══════════════════════════════════════════════════════════════════════════════════╝'
     printColor "$OUTPUT" "CYAN"
 
-    OUTPUT="Press any key to reboot and continue..."
-    printColor "$OUTPUT" CYAN
-    read -p "" IGNORE
+    printColor "Press any key to reboot and continue..." CYAN
+    read -r IGNORE
     systemctl reboot --firmware-setup
 }
 
@@ -197,7 +175,7 @@ HOSTNAME=$2
 
 install_linux
 configure_basics "$HOSTNAME"
-PASSWORD=$(create_user "$LOGIN_NAME")
+create_user "$LOGIN_NAME"
 configure_sudo
-setup_uki "$LOGIN_NAME" "$HOSTNAME" "$PASSWORD"
-
+setup_uki "$LOGIN_NAME"
+doReboot "$LOGIN_NAME" "$HOSTNAME" "$PASSWORD"

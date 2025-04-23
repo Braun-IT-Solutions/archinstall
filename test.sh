@@ -1,22 +1,20 @@
-SCRIPT_PATH=$(dirname "$0")
-cd $SCRIPT_PATH
-source ./util.sh
+#!/bin/bash
 
-FILES=("util.sh" "luks-temp.key")
+source util.sh
+while true; do
+    OUTPUT="Please enter a new secure password for your user: "
+    printColor "$OUTPUT" CYAN
+    #use -s to hide typed keys
+    read -r -s -p "Password: " NEW_PASSWORD
+    echo
+    read -r -s -p "Repeat: " REPEAT_PASSWORD
+    echo
 
-
-IFS=$'\n' 
-read -r -d '' -a PERMISSIONS < <(stat -c "%A %U %G %n" "${FILES[@]}")
-
-echo "${PERMISSIONS[0]}"
-echo "${PERMISSIONS[1]}"
-
-printf '%s\n' "${PERMISSIONS[@]}"
-
-
-
-
-# IFS='\n'
-# #PERMISSIONS=$(ls -al "${FILES[@]}" | cut -d' ' -f1,3,4,9)
-# PERMISSIONS=$(stat -c "%A %U %G %n" "${FILES[@]}")
-# echo ${PERMISSIONS}
+    if [ "$NEW_PASSWORD" = "$REPEAT_PASSWORD" ]; then
+        echo "DONE"
+        break
+    else
+        OUTPUT="Passwords do not match. Please try again."
+        printColor "$OUTPUT" RED
+    fi
+done
