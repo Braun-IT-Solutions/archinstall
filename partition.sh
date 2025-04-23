@@ -1,10 +1,17 @@
-#Checks for both parameters
-#1: Login-name
-#2: Hostname
-check_parameters() {
+#!/bin/bash
+
+#Catches errors and stops the script early
+set -eo pipefail
+
+SCRIPT_PATH=$(dirname "$0")
+cd $SCRIPT_PATH
+
+source ./util.sh
+
+check_partitions() {
     if ! [ -n "$1" ] && [ " " != "$1" ] && ! [ -n "$2" ] && [ " " != "$2" ] 2>/dev/null; then
         OUTPUT="╔═══════════════════════════════════╗\n\
-║ Error with parameters, exiting... ║\n\
+║ Error with partitions, exiting... ║\n\
 ╚═══════════════════════════════════╝\n"
         printColor "$OUTPUT" RED
         sleep 5
@@ -28,10 +35,8 @@ function ask_user_for_disk() {
         IFS=$'\n'
         DISKS=($(disks_with_name_and_size))
 
-        OUTPUT="Please select the drive to install Linux to"
-        printColor "$OUTPUT" "CYAN"
-        OUTPUT="The Drive is gonna be formatted and existing partitions are wiped"
-        printColor "$OUTPUT" "CYAN"
+        printColor "Please select the drive to install Linux to" "CYAN"
+        printColor "The Drive is gonna be formatted and existing partitions are wiped" "CYAN"
 
         for i in "${!DISKS[@]}"; do
             LINE=${DISKS[$i]}
@@ -41,8 +46,7 @@ function ask_user_for_disk() {
             IFS=$'\n'
         done
 
-        OUTPUT="Select a partition:"
-        printColor "$OUTPUT" CYAN
+        printColor "Select a partition:" CYAN
         read -r SELECTED_INDEX
 
         SELECTED_DISK=${DISKS["$SELECTED_INDEX"]}
@@ -52,8 +56,7 @@ function ask_user_for_disk() {
             echo "/dev/${SELECTED_NAME[0]}"
             return
         else
-            OUTPUT="Disk with index $SELECTED_INDEX does not exist, try again"
-            printColor "$OUTPUT" "RED"
+            printColor "Disk with index $SELECTED_INDEX does not exist, try again" "RED"
             sleep 2
         fi
     done
@@ -61,14 +64,11 @@ function ask_user_for_disk() {
 
 #Wipes handed device of partitions and creates new ones according to "./partition-scheme.sfdisk"
 function partition_disk() {
-
-    OUTPUT="Wiping Partitions off of disk ${1}..."
-    printColor "$OUTPUT" GREEN
+    printColor "Wiping Partitions off of disk ${1}..." GREEN
     #Wipes all Partitions off the device
     wipefs -a $1
 
-    OUTPUT="Partitioning disk ${1}..."
-    printColor "$OUTPUT" GREEN
+    printColor "Partitioning disk ${1}..." GREEN
     #Creates new Partitions according to scheme
     sfdisk $1 <partition-scheme.sfdisk
 }
@@ -84,19 +84,16 @@ function get_partitions() {
 
 #Formats EFI and ROOT Partition
 function format_disk() {
-    OUTPUT="Formatting partitions..."
-    printColor "$OUTPUT" GREEN
+    printColor "Formatting partitions..." GREEN
 
     EFI_PARTITION=$1
     ROOT_PARTITION=$2
 
-    OUTPUT="Formatting /efi..."
-    printColor "$OUTPUT" GREEN
+    printColor "Formatting /efi..." GREEN
     #creates MS-DOS FAT Filesystem
     mkfs.vfat -F32 $EFI_PARTITION
 
-    OUTPUT="Creating LUKS partition..."
-    printColor "$OUTPUT" GREEN
+    printColor "Creating LUKS partition..." GREEN
     # Initialize a LUKS partition and,
     #set the initial passphrase from "./luks-temp.key"
     cryptsetup luksFormat --type luks2 -q $ROOT_PARTITION luks-temp.key
@@ -104,36 +101,24 @@ function format_disk() {
     #needs the temporary password in "./luks-temp.key"
     cryptsetup luksOpen $ROOT_PARTITION linuxroot --key-file=luks-temp.key
 
-    OUTPUT="Formatting /..."
-    printColor "$OUTPUT" GREEN
+    printColor "Formatting /..." GREEN
     #creates ext4 Filesystem
     mkfs.ext4 "/dev/mapper/linuxroot"
 }
 
 #Mounts EFI and ROOT Partition
 function mount_filesystem() {
-
-    OUTPUT="Mounting /dev/mapper/linuxroot to /mnt..."
-    printColor "$OUTPUT" GREEN
+    printColor "Mounting /dev/mapper/linuxroot to /mnt..." GREEN
     #ROOT
     mount /dev/mapper/linuxroot /mnt
 
-    OUTPUT="Mounting ${1} to /mnt/efi..."
-    printColor "$OUTPUT" GREEN
+    printColor "Mounting ${1} to /mnt/efi..." GREEN
     #EFI
     mount --mkdir $1 /mnt/efi
 }
 
-#Catches errors and stops the script early
-set -eo pipefail
-
-SCRIPT_PATH=$(dirname "$0")
-cd $SCRIPT_PATH
-source ./util.sh
-
 INSTALL_DISK=$(ask_user_for_disk)
-OUTPUT="${INSTALL_DISK}"
-printColor "$OUTPUT" GREEN
+printColor "${INSTALL_DISK}" GREEN
 
 if ! [ -n "$INSTALL_DISK" ] && [ " " != "$INSTALL_DISK" ] 2>/dev/null; then
     OUTPUT="╔═══════════════════════════════════╗\n\
@@ -150,10 +135,9 @@ IFS=$'\n'
 PARTITIONS=($(get_partitions $INSTALL_DISK))
 echo "Partitions: ${PARTITIONS[@]}"
 
-check_parameters ${PARTITIONS[@]}
+check_partitions ${PARTITIONS[@]}
 
 #PARTITIONS[0] = EFI
 #PARTITIONS[1] = ROOT
 format_disk ${PARTITIONS[@]}
-
 mount_filesystem ${PARTITIONS[0]}
