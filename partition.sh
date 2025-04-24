@@ -7,13 +7,12 @@ SCRIPT_PATH=$(dirname "$0")
 cd "$SCRIPT_PATH"
 source ./util.sh
 
-check_partitions() {
+function check_partitions() {
     if ! [ -n "$1" ] && [ " " != "$1" ] && ! [ -n "$2" ] && [ " " != "$2" ] 2>/dev/null; then
         OUTPUT="╔═══════════════════════════════════╗\n\
 ║ Error with partitions, exiting... ║\n\
 ╚═══════════════════════════════════╝\n"
         printColor "$OUTPUT" RED
-        sleep 5
         exit 1
     fi
 }
@@ -56,7 +55,6 @@ function ask_user_for_disk() {
             return
         else
             printColor "Disk with index $SELECTED_INDEX does not exist, try again" "RED"
-            sleep 2
         fi
     done
 }
@@ -121,10 +119,9 @@ printColor "${INSTALL_DISK}" GREEN
 
 if ! [ -n "$INSTALL_DISK" ] && [ " " != "$INSTALL_DISK" ] 2>/dev/null; then
     OUTPUT="╔═══════════════════════════════════╗\n\
-║ Error with parameters, exiting... ║\n\
+║   Error with chosen Disk, no name returned    ║\n\
 ╚═══════════════════════════════════╝\n"
     printColor "$OUTPUT" RED
-    sleep 5
     exit 1
 fi
 
