@@ -1,4 +1,3 @@
-#!/usr/bin/bash
 #This Script runs after user login after initial setup in "/home/USER/.bashrc"
 
 onExit() {
@@ -42,7 +41,7 @@ function setFlagTo() {
 
 #Checks if BIOS secureboot is in setup mode
 function checkSetupMode() {
-  if sbctl status | grep -q "Setup Mode: Enabled"; then
+  if sbctl status | grep -q "Setup Mode:.*Enabled"; then
     return 0
   elif sbctl status | grep -q "Setup Mode"; then
     printColor "Secureboot is not in setup mode" RED
