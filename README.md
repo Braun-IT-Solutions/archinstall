@@ -1,4 +1,4 @@
-# Arch Install Script
+# BITS Arch Install Script
 
 This project provides a set of scripts to automate the installation and configuration of Arch Linux for development PCs. The entry point for the installation process is the `install.sh` script.
 
