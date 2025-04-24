@@ -1,121 +1,112 @@
+#!/bin/bash
 
-#Checks for both parameters
-#1: Login-name
-#2: Hostname
-check_parameters(){
-    if ! [ -n "$1" ] && [ " " != "$1" ] && ! [ -n "$2" ] && [ " " != "$2" ] 2>/dev/null; then
-        OUTPUT="\
-        ╔═══════════════════════════════════╗\n\
-        ║ Error with parameters, exiting... ║\n\
-        ╚═══════════════════════════════════╝\n"
-        printColor "$OUTPUT" RED
-        sleep 5
-        exit 1
-    fi
+# Catches errors and stops the script early
+set -eo pipefail
+
+SCRIPT_PATH=$(dirname "$0")
+cd "$SCRIPT_PATH"
+source ./util.sh
+
+# Base packages to install
+PACKAGES="base base-devel linux linux-firmware git nano cryptsetup amd-ucode sbctl sudo htop btop nvtop dhcpcd"
+# Hooks for mkinitcpio
+HOOKS="base systemd autodetect modconf kms keyboard sd-vconsole sd-encrypt block filesystems fsck"
+
+# Usage message for incorrect parameters
+function usage() {
+    OUTPUT="╔═══════════════════════════════════╗
+║ Error with parameters, exiting... ║
+║ \$1 username                      ║
+║ \$2 hostname                      ║
+║ \$3 password                      ║
+╚═══════════════════════════════════╝"
+    printColor "$OUTPUT" RED
+    exit 1
 }
 
-#Installs basic packages and system files
+# Check required parameters - improved logic
+if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
+    usage
+fi
+
+LOGIN_NAME="$1"
+HOSTNAME="$2"
+DEFAULT_PASSWORD="$3"
+
+# Installs basic packages and system files
 function install_linux() {
-    OUTPUT="Finding fastest mirrors..."
-    printColor "$OUTPUT" GREEN
-    #Retrieves and filters the latest pacman mirror list
+    printColor "Finding fastest mirrors..." GREEN
+    # Retrieves and filters the latest pacman mirror list
     reflector --country DE --age 24 --protocol http,https --sort rate --save /etc/pacman.d/mirrorlist
 
-    OUTPUT="Installing basic linux..."
-    printColor "$OUTPUT" GREEN
-    #Packages to install
-    PACKAGES="base base-devel linux linux-firmware git nano cryptsetup amd-ucode sbctl sudo htop btop nvtop dhcpcd"
-    #Comes preinstalled with arch, designed to create new system installations
-    #-K initializes a new pacman keyring
+    printColor "Installing basic linux..." GREEN
+    # Comes preinstalled with arch, designed to create new system installations
+    # -K initializes a new pacman keyring
     pacstrap -K /mnt $PACKAGES
 }
 
-#Generates locales, german keyboard and hostname
+# Generates locales, german keyboard and hostname
 function configure_basics() {
-    
-    OUTPUT="Settings timezone..."
-    printColor "$OUTPUT" GREEN
-    #Sets Timezone Berlin
+    printColor "Settings timezone..." GREEN
+    # Sets Timezone Berlin
     arch-chroot /mnt ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime
 
-    OUTPUT="Setting hardware clock..."
-    printColor "$OUTPUT" GREEN
-    #Sets the hardwareclock to current system time
+    printColor "Setting hardware clock..." GREEN
+    # Sets the hardwareclock to current system time
     arch-chroot /mnt hwclock --systohc
 
-    OUTPUT="Setting locales..."
-    printColor "$OUTPUT" GREEN
-    
-    #Setting german locales and EN-USA as fallback
+    printColor "Setting locales..." GREEN
+    # Setting german locales and EN-USA as fallback
     sed -i -e "/^#"de_DE.UTF-8"/s/^#//" /mnt/etc/locale.gen
     sed -i -e "/^#"en_US.UTF-8"/s/^#//" /mnt/etc/locale.gen
 
+    printColor "Setting keymap..." GREEN
+    # Sets german keyboard
+    echo "KEYMAP=de-latin1" >/mnt/etc/vconsole.conf
 
-    OUTPUT="Setting keymap..."
-    printColor "$OUTPUT" GREEN
-    #Sets german keyboard
-    echo "KEYMAP=de-latin1" > /mnt/etc/vconsole.conf
+    printColor "Setting hostname..." GREEN
+    # Sets hostname
+    echo "$HOSTNAME" >/mnt/etc/hostname
 
-    OUTPUT="Setting hostname..."
-    printColor "$OUTPUT" GREEN
-    #sets hostname
-    echo $1 > /mnt/etc/hostname
-
-    OUTPUT="Generating locales..."
-    printColor "$OUTPUT" GREEN
-    #Generates locales
+    printColor "Generating locales..." GREEN
+    # Generates locales
     arch-chroot /mnt locale-gen
 }
 
-#Setup for user with "$LOGIN_NAME"
+# Setup for user with "$LOGIN_NAME"
 function create_user() {
-    #$1 = $LOGIN_NAME
-    DEFAULT_PASSWORD="root"
-
-    OUTPUT="Creating user..."
-    printColor "$OUTPUT" GREEN
-    arch-chroot /mnt useradd -G wheel -m $1
-    echo $DEFAULT_PASSWORD | arch-chroot /mnt passwd $1 --stdin
-    
-    OUTPUT="Your initial password is \033[96m$DEFAULT_PASSWORD"
-    printColor "$OUTPUT" CYAN
-    echo $DEFAULT_PASSWORD
-    sleep 5
+    printColor "Creating user..." GREEN
+    arch-chroot /mnt useradd -G wheel -m "$LOGIN_NAME"
+    echo $DEFAULT_PASSWORD | arch-chroot /mnt passwd $LOGIN_NAME --stdin
 }
 
-#Configures sudo to not need password
+# Configures sudo to not need password
 function configure_sudo() {
-    OUTPUT="Configuring sudo..."
-    printColor "$OUTPUT" GREEN
+    printColor "Configuring sudo..." GREEN
     sed -i -e '/^# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/s/^# //' /mnt/etc/sudoers
 }
 
-#Enables systemd & dhcpcd services
+# Enables systemd & dhcpcd services
 function enable_services() {
-    OUTPUT="Enabling systemd services..."
-    printColor "$OUTPUT" GREEN
+    printColor "Enabling systemd services..." GREEN
     systemctl --root /mnt enable systemd-resolved systemd-timesyncd dhcpcd
 }
 
-#Sets unified kernel images and generates them
+# Sets unified kernel images and generates them
 function setup_uki() {
-    OUTPUT="Setting up UKI..."
-    printColor "$OUTPUT" GREEN
+    printColor "Setting up UKI..." GREEN
 
-    #Sets kernel parameters 
-    #"rw: Mount root device read-write on boot"
-    echo "rw" > /mnt/etc/kernel/cmdline
+    # Sets kernel parameters
+    # "rw: Mount root device read-write on boot"
+    echo "rw" >/mnt/etc/kernel/cmdline
     mkdir -p /mnt/efi/EFI/Linux
 
-    OUTPUT="Setting mkinitcpio hooks..."
-    printColor "$OUTPUT" GREEN
-    HOOKS="base systemd autodetect modconf kms keyboard sd-vconsole sd-encrypt block filesystems fsck"
-    #Setting our hooks for mkinitcpio
+    printColor "Setting mkinitcpio hooks..." GREEN
+    # Setting our hooks for mkinitcpio
     sed -i -e "s/^HOOKS=.*/HOOKS=($HOOKS)/g" /mnt/etc/mkinitcpio.conf
 
-    OUTPUT="Enabling UKI..."
-    printColor "$OUTPUT" GREEN
-    #Enabling our UKIs
+    printColor "Enabling UKI..." GREEN
+    # Enabling our UKIs
     sed -i -e "s/^default_config=/#default_config=/g" /mnt/etc/mkinitcpio.d/linux.preset
     sed -i -e "s/^default_image=/#default_image=/g" /mnt/etc/mkinitcpio.d/linux.preset
     sed -i -e "s/^#default_uki=/default_uki=/g" /mnt/etc/mkinitcpio.d/linux.preset
@@ -126,78 +117,44 @@ function setup_uki() {
     sed -i -e "s/^#fallback_uki=/fallback_uki=/g" /mnt/etc/mkinitcpio.d/linux.preset
     sed -i -e "s/^#fallback_options=/fallback_options=/g" /mnt/etc/mkinitcpio.d/linux.preset
 
-    OUTPUT="Generating UKI..."
-    printColor "$OUTPUT" GREEN
-    #Generates initramfs image based on kernel packages 
-    #"-P: re-generates all initramfs images"
+    printColor "Generating UKI..." GREEN
+    # Generates initramfs image based on kernel packages
+    # "-P: re-generates all initramfs images"
     arch-chroot /mnt mkinitcpio -P
 
-    OUTPUT="Installing bootloader..."
-    printColor "$OUTPUT" GREEN
-    #Install EFI bootloader 
-    #"--esp-path=: path to our efi partition"
+    printColor "Installing bootloader..." GREEN
+    # Install EFI bootloader
+    # "--esp-path=: path to our efi partition"
     arch-chroot /mnt bootctl install --esp-path=/efi
-
 
     enable_services
 
     sync
-
-    OUTPUT="Setting up temp files..."
-    printColor "$OUTPUT" GREEN
-
-    #$1 = $LOGIN_NAME
-    cp /mnt/home/$1/.bashrc /mnt/home/$1/.bashrcBACKUP
-    rm -rf /mnt/home/$1/.bashrc
-
-    cat secureBoot.sh > /mnt/home/$1/.bashrc
-    cat util.sh > /mnt/home/$1/util.sh
-    echo "1" > /mnt/home/$1/tmp.txt
-
-    cp luks-temp.key /mnt/home/$1/luks-temp.key
-    chmod 400 /mnt/home/$1/luks-temp.key
-
-OUTPUT='╔════════════════════════════════════════════════════════════════════════════════════════════════╗
-║ This is your Login-name, Hostname, your temporary password and hard-drive decryption password. ║
-║                           PLEASE WRITE THEM DOWN OR REMEMBER THEM!                             ║
-╚════════════════════════════════════════════════════════════════════════════════════════════════╝\n'
-    printColor "$OUTPUT" "YELLOW"
-    #$1 = LOGIN_NAME
-    #$2 = HOST_NAME
-    #$3 = TEMPORARY PASSWORD
-    LUKS_KEY=$(cat /mnt/home/$1/luks-temp.key)
-
-OUTPUT="Login-name: $1\nHostname: $2\nTemporary user password: $3\nTemporary Hard-drive decryption password: $LUKS_KEY\n\n"
-
-    printColor "$OUTPUT" "YELLOW"
-
-
-OUTPUT='╔═══════════════════════════════════════════════════════════════════════════════════╗
-║ Rebooting, please set Secure-Boot in BIOS to setup mode and turn on Secure-Boot!  ║
-╚═══════════════════════════════════════════════════════════════════════════════════╝'
-    printColor "$OUTPUT" "CYAN"
-
-    OUTPUT="Press any key to reboot and continue..."
-    printColor "$OUTPUT" CYAN
-    read -p "" IGNORE
-    systemctl reboot --firmware-setup
 }
 
-#Catches errors and stops the script early
-set -eo pipefail
+function setup_user_env() {
+    printColor "Setting up user environment..." GREEN
 
-SCRIPT_PATH=$(dirname "$0")
-cd $SCRIPT_PATH
-source ./util.sh
+    # Backup the original bashrc
+    cp /mnt/home/$LOGIN_NAME/.bashrc /mnt/home/$LOGIN_NAME/.bashrcBACKUP
+    rm -f /mnt/home/$LOGIN_NAME/.bashrc
 
-check_parameters $1 $2
+    # Copy necessary files
+    cat secure-boot.sh >/mnt/home/$LOGIN_NAME/.bashrc
+    cat util.sh >/mnt/home/$LOGIN_NAME/util.sh
+    echo "1" >/mnt/home/$LOGIN_NAME/tmp.txt
 
-LOGIN_NAME=$1
-HOSTNAME=$2
+    # Handle LUKS key file securely
+    cp luks-temp.key /mnt/home/$LOGIN_NAME/luks-temp.key
+    chmod 400 /mnt/home/$LOGIN_NAME/luks-temp.key
+
+    # Set proper ownership
+    arch-chroot /mnt chown -R $LOGIN_NAME:$LOGIN_NAME /home/$LOGIN_NAME
+}
 
 install_linux
-configure_basics "$HOSTNAME"
-PASSWORD=$(create_user "$LOGIN_NAME")
+configure_basics
+create_user
 configure_sudo
-setup_uki "$LOGIN_NAME" "$HOSTNAME" "$PASSWORD"
-
+setup_uki
+setup_user_env

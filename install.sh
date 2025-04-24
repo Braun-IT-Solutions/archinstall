@@ -1,64 +1,62 @@
 #!/usr/bin/bash
 
-#Prints BITS-ASCI logo...
-function print_logo() {
-    echo -e '\n\n $$$$$$$\  $$$$$$\ $$$$$$$$\  $$$$$$\' "\n" \
-        '$$  __$$\ \_$$  _|\__$$  __|$$  __$$\' "\n" \
-        '$$ |  $$ |  $$ |     $$ |   $$ /  \__|' "\n" \
-        '$$$$$$$\ |  $$ |     $$ |   \$$$$$$\' "\n" \
-        '$$  __$$\   $$ |     $$ |    \____$$\' "\n" \
-        '$$ |  $$ |  $$ |     $$ |   $$\   $$ |' "\n" \
-        '$$$$$$$  |$$$$$$\    $$ |   \$$$$$$  |' "\n" \
-        '\_______/ \______|   \__|    \______/'
-    echo -e "\nWelcome to BITS archinstall\n"
-} 
-
-#Function to ask for user detail. User details are gonna be used to automatically set Login-name and Hostname
-function ask_user_for_details() {
-
-    OUTPUT="Your first name (all lowercase):"
-    printColor "$OUTPUT" "CYAN"
-    read -p "" FIRST_NAME
-
-    OUTPUT="Your last name (all lowercase):"
-    printColor "$OUTPUT" "CYAN"
-    read -p "" LAST_NAME
-
-    OUTPUT="Your lucky number (just choose one):"
-    printColor "$OUTPUT" "CYAN"
-    read -p "" LUCKY_NUMBER
-
-    echo "$FIRST_NAME $LAST_NAME $LUCKY_NUMBER"
-}
-
-SCRIPT_PATH=$(dirname "$0")
-cd $SCRIPT_PATH
-source ./util.sh
-
-#Catches errors and stops the script early
+# Catches errors and stops the script early
 set -eo pipefail
 
-print_logo
+SCRIPT_PATH=$(dirname "$0")
+cd "$SCRIPT_PATH"
+source ./util.sh
 
+echo -e '\n\n $$$$$$$\  $$$$$$\ $$$$$$$$\  $$$$$$\' "\n" \
+    '$$  __$$\ \_$$  _|\__$$  __|$$  __$$\' "\n" \
+    '$$ |  $$ |  $$ |     $$ |   $$ /  \__|' "\n" \
+    '$$$$$$$\ |  $$ |     $$ |   \$$$$$$\' "\n" \
+    '$$  __$$\   $$ |     $$ |    \____$$\' "\n" \
+    '$$ |  $$ |  $$ |     $$ |   $$\   $$ |' "\n" \
+    '$$$$$$$  |$$$$$$\    $$ |   \$$$$$$  |' "\n" \
+    '\_______/ \______|   \__|    \______/'
+echo -e "\nWelcome to BITS archinstall\n"
+
+DEFAULT_PASSWORD="root"
 #Setup for Login-name and Hostname for use in ./configuration
-IFS=' '
-USER_DETAILS=($(ask_user_for_details))
-FIRST_NAME=${USER_DETAILS[0]}
-LAST_NAME=${USER_DETAILS[1]}
-LUCKY_NUMBER=${USER_DETAILS[2]}
+printColor "Your first name (all lowercase):" "CYAN"
+read -r FIRST_NAME
+
+printColor "Your last name (all lowercase):" "CYAN"
+read -r LAST_NAME
+
+printColor "Your lucky number (just choose one):" "CYAN"
+read -r LUCKY_NUMBER
 
 LOGIN_NAME="$FIRST_NAME.$LAST_NAME"
-OUTPUT="Login name: $LOGIN_NAME"
-printColor "$OUTPUT" GREEN
+printColor "Login name: $LOGIN_NAME" GREEN
 
 INITIALS="${FIRST_NAME:0:1}${LAST_NAME:0:1}"
 HOSTNAME="AXD-${INITIALS^^}${LUCKY_NUMBER}"
-OUTPUT="Hostname: ${HOSTNAME}"
-printColor "$OUTPUT" GREEN
-sleep 1
+printColor "Hostname: $HOSTNAME" GREEN
+printColor "Continue with enter..." CYAN
+read -r IGNORE
 
+# run setup scripts
 ./partition.sh
+./configuration.sh $LOGIN_NAME $HOSTNAME $DEFAULT_PASSWORD
 
-./configuration.sh $LOGIN_NAME $HOSTNAME
+# inform user and ask for reboot
+OUTPUT='╔════════════════════════════════════════════════════════════════════════════════════════════════╗
+║ This is your Login-name, Hostname, your temporary password and hard-drive decryption password. ║
+║                           PLEASE WRITE THEM DOWN OR REMEMBER THEM!                             ║
+╚════════════════════════════════════════════════════════════════════════════════════════════════╝\n'
+printColor "$OUTPUT" "YELLOW"
 
+LUKS_KEY=$(cat /mnt/home/$LOGIN_NAME/luks-temp.key)
 
+printColor "Login-name: $LOGIN_NAME\nHostname: $HOSTNAME\nTemporary user password: $DEFAULT_PASSWORD\nTemporary Hard-drive decryption password: $LUKS_KEY\n\n" "YELLOW"
+
+OUTPUT='╔═══════════════════════════════════════════════════════════════════════════════════╗
+║ Rebooting, please set Secure-Boot in BIOS to setup mode and turn on Secure-Boot!  ║
+╚═══════════════════════════════════════════════════════════════════════════════════╝'
+printColor "$OUTPUT" "CYAN"
+
+printColor "Press any key to reboot and continue..." CYAN
+read -r IGNORE
+systemctl reboot --firmware-setup
