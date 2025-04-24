@@ -30,7 +30,7 @@ function doReboot() {
   printColor "$1" CYAN
   printColor "Press enter to reboot..." CYAN
   read -r IGNORE
-  reboot
+  sudo reboot
 }
 
 # $1 new flag
