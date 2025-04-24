@@ -140,7 +140,12 @@ function setup_user_env() {
     rm -f /mnt/home/$LOGIN_NAME/.bashrc
 
     # Copy necessary files
-    cat secure-boot.sh >/mnt/home/$LOGIN_NAME/.bashrc
+    cat "secure-boot.sh" > "/mnt/home/$LOGIN_NAME/post-arch-install.sh"
+    echo "./post-arch-install.sh" > "/mnt/home/$LOGIN_NAME/.bashrc"
+
+    arch-chroot /mnt chown "$LOGIN_NAME:$LOGIN_NAME" "/home/$LOGIN_NAME/post-arch-install.sh"
+    arch-chroot /mnt chmod +x "/home/$LOGIN_NAME/post-arch-install.sh"
+
     cat util.sh >/mnt/home/$LOGIN_NAME/util.sh
     echo "1" >/mnt/home/$LOGIN_NAME/tmp.txt
 

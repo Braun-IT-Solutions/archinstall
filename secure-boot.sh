@@ -1,3 +1,4 @@
+#!/usr/bin/bash
 #This Script runs after user login after initial setup in "/home/USER/.bashrc"
 
 onExit() {
@@ -127,6 +128,7 @@ function cleanUp() {
   rm -f "$HOME/.bashrc"
   cp "$HOME/.bashrcBACKUP" "$HOME/.bashrc"
   rm -f "$HOME/.bashrcBACKUP"
+  rm -f "$HOME/post-arch-install.sh"
 
   # Remove other temporary files
   rm -f "$HOME/tmp.txt" "$HOME/util.sh"
