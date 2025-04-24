@@ -149,7 +149,7 @@ function setup_user_env() {
     chmod 400 /mnt/home/$LOGIN_NAME/luks-temp.key
 
     # Set proper ownership
-    arch-chroot /mnt chown -R $LOGIN_NAME:$LOGIN_NAME /mnt/home/$LOGIN_NAME
+    arch-chroot /mnt chown -R $LOGIN_NAME:$LOGIN_NAME /home/$LOGIN_NAME
 }
 
 install_linux
