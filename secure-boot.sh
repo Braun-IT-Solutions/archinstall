@@ -209,8 +209,6 @@ function setNewUserPassword() {
 }
 
 # Main script execution
-ERROR_MESSAGE=$(checkSetupMode 2>&1)
-
 # Check if temp file exists
 if [[ ! -f "$TEMP_TXT" ]]; then
   printColor "Error: Missing $TEMP_TXT file!" RED
@@ -220,6 +218,7 @@ fi
 # Read the flag for the next step to run
 FLAG=$(cat "$TEMP_TXT")
 if [ "$FLAG" -eq 1 ] 2>/dev/null; then
+  ERROR_MESSAGE=$(checkSetupMode 2>&1)
   ERROR_MESSAGE=$(createKeysAndSign 2>&1)
   ERROR_MESSAGE=$(setRecoveryKey 2>&1)
   ERROR_MESSAGE=$(setFlagTo "2" 2>&1)
