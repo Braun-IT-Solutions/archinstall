@@ -1,5 +1,16 @@
-#!/usr/bin/bash
 #This Script runs after user login after initial setup in "/home/USER/.bashrc"
+
+onExit() {
+  rv=$?
+  if [ ! $rv -eq 0 ]; then
+    echo "Error in setup script" >/dev/tty
+    echo "Code: $rv" >/dev/tty
+    echo "Message: $ERROR_MESSAGE" >/dev/tty
+  fi
+  exit 0
+}
+
+trap "onExit" EXIT
 
 # Catches errors and stops the script early
 set -eo pipefail
@@ -19,7 +30,7 @@ function doReboot() {
   printColor "$1" CYAN
   printColor "Press enter to reboot..." CYAN
   read -r IGNORE
-  reboot
+  sudo reboot
 }
 
 # $1 new flag
@@ -30,7 +41,7 @@ function setFlagTo() {
 
 #Checks if BIOS secureboot is in setup mode
 function checkSetupMode() {
-  if sbctl status | grep -q "Setup Mode: Enabled"; then
+  if sbctl status | grep -q "Setup Mode:.*Enabled"; then
     return 0
   elif sbctl status | grep -q "Setup Mode"; then
     printColor "Secureboot is not in setup mode" RED
@@ -198,8 +209,6 @@ function setNewUserPassword() {
 }
 
 # Main script execution
-checkSetupMode
-
 # Check if temp file exists
 if [[ ! -f "$TEMP_TXT" ]]; then
   printColor "Error: Missing $TEMP_TXT file!" RED
@@ -209,21 +218,22 @@ fi
 # Read the flag for the next step to run
 FLAG=$(cat "$TEMP_TXT")
 if [ "$FLAG" -eq 1 ] 2>/dev/null; then
-  createKeysAndSign
-  setRecoveryKey
-  setFlagTo "2"
-  doReboot "Script continues after reboot"
+  ERROR_MESSAGE=$(checkSetupMode 2>&1)
+  ERROR_MESSAGE=$(createKeysAndSign 2>&1)
+  ERROR_MESSAGE=$(setRecoveryKey 2>&1)
+  ERROR_MESSAGE=$(setFlagTo "2" 2>&1)
+  ERROR_MESSAGE=$(doReboot "Script continues after reboot" 2>&1)
 elif [ "$FLAG" -eq 2 ] 2>/dev/null; then
-  rollingTPM2
-  setNewUserPassword
-  sudoRequirePW
-  cleanUp
+  ERROR_MESSAGE=$(rollingTPM2 2>&1)
+  ERROR_MESSAGE=$(setNewUserPassword 2>&1)
+  ERROR_MESSAGE=$(sudoRequirePW 2>&1)
+  ERROR_MESSAGE=$(cleanUp 2>&1)
   OUTPUT="╔═════════════════════════════════════════════════════╗\n\
 ║ Secure the luks recovery key in ($RECOVERY_KEY_TXT) ║\n\
 ║ Make sure to store it safely and securely!          ║\n\
 ╚═════════════════════════════════════════════════════╝\n"
   printColor "$OUTPUT" YELLOW
-  doReboot "Script is done after reboot"
+  ERROR_MESSAGE=$(doReboot "Script is done after reboot" 2>&1)
 else
   printColor "Unexpected FLAG value ($FLAG) in $TEMP_TXT" RED
   printColor "Expected values are 1 or 2. Please restore a correct value to continue." RED
