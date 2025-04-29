@@ -71,6 +71,12 @@ function configure_basics() {
     printColor "Generating locales..." GREEN
     # Generates locales
     arch-chroot /mnt locale-gen
+
+    printColor "Set locale.conf..." GREEN
+    echo "LANG=de_DE.UFT-8" >/mnt/etc/locale.conf
+    echo "LANGUAGE=en:de_DE" >>/mnt/etc/locale.conf
+    printColor "Done with basic settings..." GREEN
+
 }
 
 # Setup for user with "$LOGIN_NAME"
@@ -140,8 +146,8 @@ function setup_user_env() {
     rm -f /mnt/home/$LOGIN_NAME/.bashrc
 
     # Copy necessary files
-    cat "secure-boot.sh" > "/mnt/home/$LOGIN_NAME/post-arch-install.sh"
-    echo "./post-arch-install.sh" > "/mnt/home/$LOGIN_NAME/.bashrc"
+    cat "secure-boot.sh" >"/mnt/home/$LOGIN_NAME/post-arch-install.sh"
+    echo "./post-arch-install.sh" >"/mnt/home/$LOGIN_NAME/.bashrc"
 
     arch-chroot /mnt chown "$LOGIN_NAME:$LOGIN_NAME" "/home/$LOGIN_NAME/post-arch-install.sh"
     arch-chroot /mnt chmod +x "/home/$LOGIN_NAME/post-arch-install.sh"
