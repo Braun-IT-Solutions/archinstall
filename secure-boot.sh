@@ -193,9 +193,10 @@ function setNewUserPassword() {
   while true; do
     printColor "Please enter a new secure password for your user: " CYAN
     #use -s to hide typed keys
-    read -r -s -p "Password: " NEW_PASSWORD
+    read -r -s NEW_PASSWORD
     echo
-    read -r -s -p "Repeat: " REPEAT_PASSWORD
+    printColor "Repeat: " CYAN
+    read -r -s REPEAT_PASSWORD
     echo
 
     if [ "$NEW_PASSWORD" = "$REPEAT_PASSWORD" ]; then
